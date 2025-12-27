@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SovaCore | Ambassador Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        body { background: #050505; color: white; font-family: 'Inter', sans-serif; }
+        .active-link { background: rgba(34, 211, 238, 0.1); color: #22d3ee; border-left: 3px solid #22d3ee; }
+        .hidden-section { display: none; }
+    </style>
+</head>
+<body class="overflow-x-hidden">
+
+    <div class="lg:hidden flex items-center justify-between p-4 border-b border-gray-900 bg-black sticky top-0 z-50">
+        <h2 class="font-bold font-mono">SOVA<span class="text-cyan-400">CORE</span></h2>
+        <button id="menu-toggle" class="text-cyan-400">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path></svg>
+        </button>
+    </div>
+
+    <div class="flex min-h-screen">
+        <aside id="sidebar" class="fixed lg:relative inset-y-0 left-0 w-64 bg-black border-r border-gray-900 p-6 transform -translate-x-full lg:translate-x-0 transition-transform duration-300 z-50">
+            <div class="hidden lg:block mb-10">
+                <h2 class="text-xl font-bold font-mono">SOVA<span class="text-cyan-400">CORE</span></h2>
+            </div>
+            
+            <nav class="space-y-2">
+                <button onclick="showSection('overview')" class="nav-btn w-full text-left p-3 rounded transition text-sm active-link">Overview</button>
+                <button onclick="showSection('referrals')" class="nav-btn w-full text-left p-3 rounded transition text-sm text-gray-500 hover:text-white">Referrals</button>
+                <button onclick="showSection('profile')" class="nav-btn w-full text-left p-3 rounded transition text-sm text-gray-500 hover:text-white">Profile Settings</button>
+            </nav>
+
+            <div class="mt-auto pt-10">
+                <a href="index.html" class="text-red-500 text-xs font-bold hover:underline">LOGOUT SYSTEM</a>
+            </div>
+        </aside>
+
+        <main class="flex-1 p-4 md:p-10 w-full overflow-x-hidden">
+            
+            <section id="overview" class="dashboard-section">
+                <header class="flex flex-col md:flex-row justify-between items-start md:items-center mb-10 gap-4">
+                    <h1 class="text-2xl font-bold">System Overview</h1>
+                    <div class="bg-gray-900 px-4 py-2 rounded-lg border border-gray-800 text-[10px] text-cyan-400 font-mono">NODE_STATUS: STABLE</div>
+                </header>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-10">
+                    <div class="bg-gray-900/50 p-6 rounded-xl border border-gray-800">
+                        <p class="text-gray-500 text-xs uppercase tracking-widest">Available Balance</p>
+                        <h3 class="text-3xl font-bold mt-2 text-white">$0.00</h3>
+                    </div>
+                    <div class="bg-gray-900/50 p-6 rounded-xl border border-gray-800">
+                        <p class="text-gray-500 text-xs uppercase tracking-widest">Total Earned</p>
+                        <h3 class="text-3xl font-bold mt-2 text-gray-400">$0.00</h3>
+                    </div>
+                    <div class="bg-gray-900/50 p-6 rounded-xl border border-gray-800">
+                        <p class="text-gray-500 text-xs uppercase tracking-widest">Success Rate</p>
+                        <h3 class="text-3xl font-bold mt-2 text-cyan-400">0%</h3>
+                    </div>
+                </div>
+            </section>
+
+            <section id="referrals" class="dashboard-section hidden-section">
+                <h2 class="text-2xl font-bold mb-6">Your Referrals</h2>
+                <div class="bg-gray-900 rounded-xl border border-gray-800 overflow-x-auto">
+                    <table class="w-full text-left">
+                        <thead class="bg-black/50 text-gray-500 text-[10px] uppercase tracking-tighter">
+                            <tr>
+                                <th class="p-4">Client Name</th>
+                                <th class="p-4">Service Type</th>
+                                <th class="p-4">Status</th>
+                                <th class="p-4 text-right">Potential Earn</th>
+                            </tr>
+                        </thead>
+                        <tbody class="text-sm text-gray-400">
+                            <tr>
+                                <td colspan="4" class="p-10 text-center italic">No active referrals found. Start sharing your link to earn commissions.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <section id="profile" class="dashboard-section hidden-section">
+                <h2 class="text-2xl font-bold mb-6">Profile Settings</h2>
+                <div class="bg-gray-900 p-6 md:p-8 rounded-xl border border-gray-800 max-w-2xl">
+                    <div class="flex items-center gap-6 mb-8">
+                        <div class="w-20 h-20 bg-gray-800 rounded-full border-2 border-cyan-400 flex items-center justify-center overflow-hidden">
+                            <span class="text-gray-500 text-xs">NO IMG</span>
+                        </div>
+                        <div>
+                            <button class="bg-gray-800 text-white px-4 py-2 rounded text-xs hover:bg-gray-700 transition">Change Photo</button>
+                            <p class="text-[10px] text-gray-500 mt-2">Recommended: Square PNG/JPG</p>
+                        </div>
+                    </div>
+
+                    <form class="space-y-6">
+                        <div class="grid md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="text-xs text-gray-500 block mb-2 uppercase tracking-widest">Full Name</label>
+                                <input type="text" value="New Ambassador" class="w-full bg-black border border-gray-800 p-3 rounded outline-none focus:border-cyan-400 text-sm">
+                            </div>
+                            <div>
+                                <label class="text-xs text-gray-500 block mb-2 uppercase tracking-widest">Withdrawal Number</label>
+                                <input type="text" placeholder="+123..." class="w-full bg-black border border-gray-800 p-3 rounded outline-none focus:border-cyan-400 text-sm">
+                            </div>
+                        </div>
+                        <div>
+                            <label class="text-xs text-gray-500 block mb-2 uppercase tracking-widest">Email Address</label>
+                            <input type="email" value="user@example.com" class="w-full bg-black border border-gray-800 p-3 rounded outline-none text-gray-600 text-sm" disabled>
+                            <p class="text-[9px] text-gray-600 mt-1">Email cannot be changed after registration.</p>
+                        </div>
+                        <button type="button" class="bg-cyan-500 text-black font-bold px-8 py-3 rounded text-sm hover:bg-cyan-400 transition">SAVE CHANGES</button>
+                    </form>
+                </div>
+            </section>
+
+        </main>
+    </div>
+
+    <script>
+
+        const supabaseUrl = 'https://xhmsqsooabpcysacaroc.supabase.co';
+        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhobXNxc29vYWJwY3lzYWNhcm9jIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjY4NDU5NDksImV4cCI6MjA4MjQyMTk0OX0.jgTSVP1aPE6kTpp8IvNv-ezVAMmEo-qh7OMzOsBgBx4';
+        const supabase = supabase.createClient(supabaseUrl, supabaseKey);
+
+        async function checkUser() {
+            const { data: { user } } = await supabase.auth.getUser();
+            
+            if (!user) {
+                // No user found, redirect to login
+                window.location.href = 'login.html';
+            } else {
+                // User is logged in, you can now load their specific data
+                console.log("Welcome:", user.email);
+                loadUserReferrals(user.id);
+            }
+        }
+
+        // Run the check immediately when the page loads
+        checkUser();
+
+        // Toggle Mobile Menu
+        const menuToggle = document.getElementById('menu-toggle');
+        const sidebar = document.getElementById('sidebar');
+
+        menuToggle.addEventListener('click', () => {
+            sidebar.classList.toggle('-translate-x-full');
+        });
+
+        // Switch Sections
+        function showSection(id) {
+            // Hide all sections
+            document.querySelectorAll('.dashboard-section').forEach(section => {
+                section.classList.add('hidden-section');
+            });
+            // Show target section
+            document.getElementById(id).classList.remove('hidden-section');
+            
+            // Update Active Link styling
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.classList.remove('active-link');
+                btn.classList.add('text-gray-500');
+            });
+            event.currentTarget.classList.add('active-link');
+            event.currentTarget.classList.remove('text-gray-500');
+
+            // Close sidebar on mobile after clicking
+            if(window.innerWidth < 1024) {
+                sidebar.classList.add('-translate-x-full');
+            }
+        }
+    </script>
+</body>
+</html>
