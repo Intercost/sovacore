@@ -121,79 +121,80 @@
     </div>
 
     <script>
-    const supabaseUrl = 'https://xhmsqsooabpcysacaroc.supabase.co';
-    const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhobXNxc29vYWJwY3lzYWNhcm9jIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjY4NDU5NDksImV4cCI6MjA4MjQyMTk0OX0.jgTSVP1aPE6kTpp8IvNv-ezVAMmEo-qh7OMzOsBgBx4';
-    const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
-
-    // 1. Back Button Logic: Send to index if they try to go "back"
-    window.history.pushState(null, null, window.location.href);
-    window.onpopstate = function() {
-        window.location.href = 'index.html';
-    };
-
-    async function checkUser() {
-        const { data: { user } } = await supabaseClient.auth.getUser();
-        if (!user) {
-            window.location.href = 'login.html';
-        } else {
-            // 2. Display Welcome Email in Dashboard UI
-            document.querySelector('h1').textContent = `Welcome, ${user.email}`;
+        const supabaseUrl = 'https://xhmsqsooabpcysacaroc.supabase.co';
+        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhobXNxc29vYWJwY3lzYWNhcm9jIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjY4NDU5NDksImV4cCI6MjA4MjQyMTk0OX0.jgTSVP1aPE6kTpp8IvNv-ezVAMmEo-qh7OMzOsBgBx4';
+        const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
+    
+        // 1. Back Button Logic: Send to index if they try to go "back"
+        window.history.pushState(null, null, window.location.href);
+        window.onpopstate = function() {
+            window.location.href = 'index.html';
+        };
+    
+        async function checkUser() {
+            const { data: { user } } = await supabaseClient.auth.getUser();
+            if (!user) {
+                window.location.href = 'login.html';
+            } else {
+                // 2. Display Welcome Email in Dashboard UI
+                document.querySelector('h1').textContent = `Welcome, ${user.email}`;
+                
+                // 3. Set Profile Defaults
+                document.getElementById('profile-email').value = user.email;
+                document.getElementById('profile-name').value = user.user_metadata.full_name || "New Ambassador";
+                
+                if(user.user_metadata.avatar_url) {
+                    const img = document.getElementById('user-photo');
+                    img.src = user.user_metadata.avatar_url;
+                    img.classList.remove('hidden');
+                    document.getElementById('default-icon').classList.add('hidden');
+                }
+            }
+        }
+        checkUser();
+    
+        // 4. Edit/Save Toggle Logic
+        let isEditing = false;
+        function toggleEdit() {
+            const btn = document.getElementById('edit-save-btn');
+            const inputs = [document.getElementById('profile-name'), document.getElementById('profile-phone')];
             
-            // 3. Set Profile Defaults
-            document.getElementById('profile-email').value = user.email;
-            document.getElementById('profile-name').value = user.user_metadata.full_name || "New Ambassador";
+            isEditing = !isEditing;
             
-            if(user.user_metadata.avatar_url) {
+            if (isEditing) {
+                btn.textContent = "SAVE CHANGES";
+                btn.classList.replace('bg-cyan-500', 'bg-green-500');
+                inputs.forEach(i => {
+                    i.disabled = false;
+                    i.classList.replace('text-gray-500', 'text-white');
+                });
+            } else {
+                // Here you would normally call supabaseClient.auth.updateUser() to save
+                btn.textContent = "EDIT";
+                btn.classList.replace('bg-green-500', 'bg-cyan-500');
+                inputs.forEach(i => {
+                    i.disabled = true;
+                    i.classList.replace('text-white', 'text-gray-500');
+                });
+                alert("Changes saved to local session!");
+            }
+        }
+    
+        // 5. Image Upload Preview
+        document.getElementById('file-input').onchange = function(e) {
+            const [file] = e.target.files;
+            if (file) {
                 const img = document.getElementById('user-photo');
-                img.src = user.user_metadata.avatar_url;
+                img.src = URL.createObjectURL(file);
                 img.classList.remove('hidden');
                 document.getElementById('default-icon').classList.add('hidden');
             }
-        }
-    }
-    checkUser();
-
-    // 4. Edit/Save Toggle Logic
-    let isEditing = false;
-    function toggleEdit() {
-        const btn = document.getElementById('edit-save-btn');
-        const inputs = [document.getElementById('profile-name'), document.getElementById('profile-phone')];
-        
-        isEditing = !isEditing;
-        
-        if (isEditing) {
-            btn.textContent = "SAVE CHANGES";
-            btn.classList.replace('bg-cyan-500', 'bg-green-500');
-            inputs.forEach(i => {
-                i.disabled = false;
-                i.classList.replace('text-gray-500', 'text-white');
-            });
-        } else {
-            // Here you would normally call supabaseClient.auth.updateUser() to save
-            btn.textContent = "EDIT";
-            btn.classList.replace('bg-green-500', 'bg-cyan-500');
-            inputs.forEach(i => {
-                i.disabled = true;
-                i.classList.replace('text-white', 'text-gray-500');
-            });
-            alert("Changes saved to local session!");
-        }
-    }
-
-    // 5. Image Upload Preview
-    document.getElementById('file-input').onchange = function(e) {
-        const [file] = e.target.files;
-        if (file) {
-            const img = document.getElementById('user-photo');
-            img.src = URL.createObjectURL(file);
-            img.classList.remove('hidden');
-            document.getElementById('default-icon').classList.add('hidden');
-        }
-    };
-
-    // Keep your existing showSection and menuToggle functions here...
-</script>
+        };
+    
+        // Keep your existing showSection and menuToggle functions here...
+    </script>
 </body>
 
 </html>
+
 
