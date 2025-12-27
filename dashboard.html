@@ -142,7 +142,7 @@
             } else {
                 // Display email in the header
                 const headerTitle = document.querySelector('h1');
-                if (headerTitle) headerTitle.textContent = `Welcome, ${user.email}`;
+                if (headerTitle) headerTitle.textContent = `Welcome, ${user.user_metadata?.full_name || "New Ambassador"}`;
                 
                 // Populate Profile Fields
                 document.getElementById('profile-email').value = user.email;
@@ -242,6 +242,7 @@
 </body>
 
 </html>
+
 
 
 
