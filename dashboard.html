@@ -121,57 +121,56 @@
     </div>
 
     <script>
+    const supabaseUrl = 'https://xhmsqsooabpcysacaroc.supabase.co';
+    const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhobXNxc29vYWJwY3lzYWNhcm9jIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjY4NDU5NDksImV4cCI6MjA4MjQyMTk0OX0.jgTSVP1aPE6kTpp8IvNv-ezVAMmEo-qh7OMzOsBgBx4';
+    
+    // FIXED: Renamed to supabaseClient to avoid the "already declared" error
+    const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
 
-        const supabaseUrl = 'https://xhmsqsooabpcysacaroc.supabase.co';
-        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhobXNxc29vYWJwY3lzYWNhcm9jIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjY4NDU5NDksImV4cCI6MjA4MjQyMTk0OX0.jgTSVP1aPE6kTpp8IvNv-ezVAMmEo-qh7OMzOsBgBx4';
-        const supabase = supabase.createClient(supabaseUrl, supabaseKey);
-
-        async function checkUser() {
-            const { data: { user } } = await supabase.auth.getUser();
-            
-            if (!user) {
-                // No user found, redirect to login
-                window.location.href = 'login.html';
-            } else {
-                // User is logged in, you can now load their specific data
-                console.log("Welcome:", user.email);
-                loadUserReferrals(user.id);
-            }
+    async function checkUser() {
+        // FIXED: Using the new variable name here
+        const { data: { user } } = await supabaseClient.auth.getUser();
+        
+        if (!user) {
+            window.location.href = 'login.html';
+        } else {
+            console.log("Welcome:", user.email);
+            // You can add loadUserReferrals(user.id) here later
         }
+    }
 
-        // Run the check immediately when the page loads
-        checkUser();
+    checkUser();
 
-        // Toggle Mobile Menu
-        const menuToggle = document.getElementById('menu-toggle');
-        const sidebar = document.getElementById('sidebar');
+    // Side Menu Toggle Logic
+    const menuToggle = document.getElementById('menu-toggle');
+    const sidebar = document.getElementById('sidebar');
 
+    if (menuToggle && sidebar) {
         menuToggle.addEventListener('click', () => {
             sidebar.classList.toggle('-translate-x-full');
         });
+    }
 
-        // Switch Sections
-        function showSection(id) {
-            // Hide all sections
-            document.querySelectorAll('.dashboard-section').forEach(section => {
-                section.classList.add('hidden-section');
-            });
-            // Show target section
-            document.getElementById(id).classList.remove('hidden-section');
-            
-            // Update Active Link styling
-            document.querySelectorAll('.nav-btn').forEach(btn => {
-                btn.classList.remove('active-link');
-                btn.classList.add('text-gray-500');
-            });
-            event.currentTarget.classList.add('active-link');
-            event.currentTarget.classList.remove('text-gray-500');
+    // Navigation Logic
+    function showSection(id) {
+        document.querySelectorAll('.dashboard-section').forEach(section => {
+            section.classList.add('hidden-section');
+        });
+        document.getElementById(id).classList.remove('hidden-section');
+        
+        document.querySelectorAll('.nav-btn').forEach(btn => {
+            btn.classList.remove('active-link');
+            btn.classList.add('text-gray-500');
+        });
+        
+        event.currentTarget.classList.add('active-link');
+        event.currentTarget.classList.remove('text-gray-500');
 
-            // Close sidebar on mobile after clicking
-            if(window.innerWidth < 1024) {
-                sidebar.classList.add('-translate-x-full');
-            }
+        if(window.innerWidth < 1024) {
+            sidebar.classList.add('-translate-x-full');
         }
-    </script>
+    }
+</script>
 </body>
+
 </html>
