@@ -42,23 +42,30 @@
     <script>
         const supabaseUrl = 'https://xhmsqsooabpcysacaroc.supabase.co';
         const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhobXNxc29vYWJwY3lzYWNhcm9jIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjY4NDU5NDksImV4cCI6MjA4MjQyMTk0OX0.jgTSVP1aPE6kTpp8IvNv-ezVAMmEo-qh7OMzOsBgBx4';
-        
-        // FIXED: Renamed variable to supabaseClient to avoid conflict
         const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
-
+    
+        // AUTO-LOGON: Check if user is already logged in
+        async function checkExistingSession() {
+            const { data: { session } } = await supabaseClient.auth.getSession();
+            if (session) {
+                window.location.href = 'dashboard.html';
+            }
+        }
+        checkExistingSession();
+    
         async function signInWithGoogle() {
             const { data, error } = await supabaseClient.auth.signInWithOAuth({
                 provider: 'google',
                 options: {
-                    // This line is "smart": it detects your Vercel URL automatically
-                    redirectTo: window.location.origin + '/dashboard.html'
+                    redirectTo: window.location.origin + '/dashboard.html',
+                    queryParams: { prompt: 'select_account' } // Allows switching accounts
                 }
             });
-            
-            if (error) console.error('Error logging in:', error.message);
+            if (error) console.error('Error:', error.message);
         }
     </script>
 
 </body>
 
 </html>
+
