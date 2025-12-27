@@ -120,30 +120,37 @@
         </main>
     </div>
 
-    <script>
+   <script>
         const supabaseUrl = 'https://xhmsqsooabpcysacaroc.supabase.co';
         const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhobXNxc29vYWJwY3lzYWNhcm9jIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjY4NDU5NDksImV4cCI6MjA4MjQyMTk0OX0.jgTSVP1aPE6kTpp8IvNv-ezVAMmEo-qh7OMzOsBgBx4';
+        
+        // Use supabaseClient to avoid naming conflicts with the global library
         const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
     
-        // 1. Back Button Logic: Send to index if they try to go "back"
+        // 1. Back Button Logic: Redirect to index instead of login
         window.history.pushState(null, null, window.location.href);
         window.onpopstate = function() {
             window.location.href = 'index.html';
         };
     
+        // 2. Authentication & UI Population
         async function checkUser() {
             const { data: { user } } = await supabaseClient.auth.getUser();
+            
             if (!user) {
                 window.location.href = 'login.html';
             } else {
-                // 2. Display Welcome Email in Dashboard UI
-                document.querySelector('h1').textContent = `Welcome, ${user.email}`;
+                // Display email in the header
+                const headerTitle = document.querySelector('h1');
+                if (headerTitle) headerTitle.textContent = `Welcome, ${user.email}`;
                 
-                // 3. Set Profile Defaults
+                // Populate Profile Fields
                 document.getElementById('profile-email').value = user.email;
-                document.getElementById('profile-name').value = user.user_metadata.full_name || "New Ambassador";
+                // Use metadata name if available, otherwise default
+                document.getElementById('profile-name').value = user.user_metadata?.full_name || "New Ambassador";
                 
-                if(user.user_metadata.avatar_url) {
+                // Set Profile Picture if it exists in Google/Supabase metadata
+                if(user.user_metadata?.avatar_url) {
                     const img = document.getElementById('user-photo');
                     img.src = user.user_metadata.avatar_url;
                     img.classList.remove('hidden');
@@ -151,50 +158,90 @@
                 }
             }
         }
-        checkUser();
+    
+        // 3. Navigation Logic (This fixes your "Not Defined" error)
+        function showSection(id) {
+            // Hide all
+            document.querySelectorAll('.dashboard-section').forEach(section => {
+                section.classList.add('hidden-section');
+            });
+            // Show selected
+            document.getElementById(id).classList.remove('hidden-section');
+            
+            // Update Sidebar UI
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.classList.remove('active-link');
+                btn.classList.add('text-gray-500');
+            });
+            
+            // Highlight active link
+            if (event && event.currentTarget) {
+                event.currentTarget.classList.add('active-link');
+                event.currentTarget.classList.remove('text-gray-500');
+            }
+    
+            // Auto-close mobile sidebar
+            const sidebar = document.getElementById('sidebar');
+            if(window.innerWidth < 1024) {
+                sidebar.classList.add('-translate-x-full');
+            }
+        }
     
         // 4. Edit/Save Toggle Logic
         let isEditing = false;
         function toggleEdit() {
             const btn = document.getElementById('edit-save-btn');
-            const inputs = [document.getElementById('profile-name'), document.getElementById('profile-phone')];
+            const nameInput = document.getElementById('profile-name');
+            const phoneInput = document.getElementById('profile-phone');
             
             isEditing = !isEditing;
             
             if (isEditing) {
                 btn.textContent = "SAVE CHANGES";
                 btn.classList.replace('bg-cyan-500', 'bg-green-500');
-                inputs.forEach(i => {
-                    i.disabled = false;
-                    i.classList.replace('text-gray-500', 'text-white');
-                });
+                nameInput.disabled = false;
+                phoneInput.disabled = false;
+                nameInput.classList.replace('text-gray-500', 'text-white');
+                phoneInput.classList.replace('text-gray-500', 'text-white');
             } else {
-                // Here you would normally call supabaseClient.auth.updateUser() to save
                 btn.textContent = "EDIT";
                 btn.classList.replace('bg-green-500', 'bg-cyan-500');
-                inputs.forEach(i => {
-                    i.disabled = true;
-                    i.classList.replace('text-white', 'text-gray-500');
-                });
-                alert("Changes saved to local session!");
+                nameInput.disabled = true;
+                phoneInput.disabled = true;
+                nameInput.classList.replace('text-white', 'text-gray-500');
+                phoneInput.classList.replace('text-white', 'text-gray-500');
+                alert("Changes saved to session!");
             }
         }
     
-        // 5. Image Upload Preview
-        document.getElementById('file-input').onchange = function(e) {
-            const [file] = e.target.files;
-            if (file) {
-                const img = document.getElementById('user-photo');
-                img.src = URL.createObjectURL(file);
-                img.classList.remove('hidden');
-                document.getElementById('default-icon').classList.add('hidden');
-            }
-        };
+        // 5. Image Upload Preview Logic
+        const fileInput = document.getElementById('file-input');
+        if (fileInput) {
+            fileInput.onchange = function(e) {
+                const [file] = e.target.files;
+                if (file) {
+                    const img = document.getElementById('user-photo');
+                    img.src = URL.createObjectURL(file);
+                    img.classList.remove('hidden');
+                    document.getElementById('default-icon').classList.add('hidden');
+                }
+            };
+        }
     
-        // Keep your existing showSection and menuToggle functions here...
+        // Sidebar Toggle for Mobile
+        const menuToggle = document.getElementById('menu-toggle');
+        if (menuToggle) {
+            menuToggle.addEventListener('click', () => {
+                document.getElementById('sidebar').classList.toggle('-translate-x-full');
+            });
+        }
+    
+        // Initial load
+        checkUser();
     </script>
 </body>
 
 </html>
+
 
 
