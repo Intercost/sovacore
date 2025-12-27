@@ -47,10 +47,10 @@
         const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
 
         async function signInWithGoogle() {
-            // FIXED: Using the new variable name here
             const { data, error } = await supabaseClient.auth.signInWithOAuth({
                 provider: 'google',
                 options: {
+                    // This line is "smart": it detects your Vercel URL automatically
                     redirectTo: window.location.origin + '/dashboard.html'
                 }
             });
@@ -60,4 +60,5 @@
     </script>
 
 </body>
+
 </html>
