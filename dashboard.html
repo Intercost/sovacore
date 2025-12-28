@@ -213,7 +213,7 @@
         // 5. REFERRALS DATA
         async function loadReferrals(userId) {
             const { data, error } = await supabaseClient
-                .from('referrals')
+                .from('Referrals')
                 .select('*')
                 .eq('referrer_id', userId);
     
@@ -245,6 +245,7 @@
 </body>
 
 </html>
+
 
 
 
