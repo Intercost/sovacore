@@ -236,6 +236,12 @@
             document.getElementById(id).classList.remove('hidden-section');
             document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active-link'));
             if (event) event.currentTarget.classList.add('active-link');
+
+            // Auto-close sidebar on mobile after clicking a link
+            if (window.innerWidth < 1024) {
+                document.getElementById('sidebar').classList.add('-translate-x-full');
+                document.getElementById('sidebar').classList.remove('translate-x-0');
+            }
         }
     
         // Initial Start
@@ -268,6 +274,7 @@
 </body>
 
 </html>
+
 
 
 
