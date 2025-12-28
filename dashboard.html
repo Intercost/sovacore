@@ -44,6 +44,19 @@
                 <header class="flex flex-col md:flex-row justify-between items-start md:items-center mb-10 gap-4">
                     <h1 class="text-2xl font-bold">System Overview</h1>
                     <div class="bg-gray-900 px-4 py-2 rounded-lg border border-gray-800 text-[10px] text-cyan-400 font-mono">NODE_STATUS: STABLE</div>
+                    <div>
+                        <h1 class="text-2xl font-bold" id="welcome-text">System Overview</h1>
+                        <p class="text-gray-500 text-xs mt-1">Operational Currency: <span id="current-currency-display" class="text-cyan-400 font-bold">USD ($)</span></p>
+                    </div>
+                    <div class="flex gap-3">
+                        <select id="currency-selector" onchange="updateCurrency()" class="bg-black border border-gray-800 text-xs text-gray-400 p-2 rounded outline-none focus:border-cyan-400">
+                            <option value="USD" data-symbol="$">USD ($)</option>
+                            <option value="KES" data-symbol="KSh">KES (KSh)</option>
+                            <option value="EUR" data-symbol="€">EUR (€)</option>
+                            <option value="GBP" data-symbol="£">GBP (£)</option>
+                        </select>
+                        <div class="bg-gray-900 px-4 py-2 rounded-lg border border-gray-800 text-[10px] text-cyan-400 font-mono flex items-center">NODE_STATUS: STABLE</div>
+                    </div>
                 </header>
 
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-10">
@@ -136,30 +149,105 @@
         // 2. Authentication & UI Population
         async function checkUser() {
             const { data: { user } } = await supabaseClient.auth.getUser();
-            
             if (!user) {
                 window.location.href = 'login.html';
+                return;
+            }
+        
+            // Load Permanent Data from Metadata
+            const meta = user.user_metadata;
+            document.getElementById('welcome-text').textContent = `Welcome, ${meta?.full_name || "Ambassador"}`;
+            document.getElementById('profile-name').value = meta?.full_name || "";
+            document.getElementById('profile-phone').value = meta?.withdrawal_number || "";
+            document.getElementById('profile-email').value = user.email;
+            
+            // Set Currency
+            if(meta?.currency) {
+                document.getElementById('currency-selector').value = meta.currency;
+                updateCurrency(); // Refresh symbols on page
+            }
+        
+            // Load Official Referrals from Supabase Table
+            loadReferrals(user.id);
+        }
+        
+        // --- 3. PERMANENT PROFILE STORAGE ---
+        let isEditing = false;
+        async function toggleEdit() {
+            const btn = document.getElementById('edit-save-btn');
+            const inputs = [document.getElementById('profile-name'), document.getElementById('profile-phone')];
+            
+            if (!isEditing) {
+                // Switch to UI Edit Mode
+                isEditing = true;
+                btn.textContent = "SAVING...";
+                inputs.forEach(i => { i.disabled = false; i.classList.replace('text-gray-500', 'text-white'); });
+                btn.textContent = "CONFIRM CHANGES";
+                btn.classList.replace('bg-cyan-500', 'bg-green-600');
             } else {
-                // Display email in the header
-                const headerTitle = document.querySelector('h1');
-                if (headerTitle) headerTitle.textContent = `Welcome, ${user.user_metadata?.full_name || "New Ambassador"}`;
-                
-                // Populate Profile Fields
-                document.getElementById('profile-email').value = user.email;
-                // Use metadata name if available, otherwise default
-                document.getElementById('profile-name').value = user.user_metadata?.full_name || "New Ambassador";
-                
-                // Set Profile Picture if it exists in Google/Supabase metadata
-                if(user.user_metadata?.avatar_url) {
-                    const img = document.getElementById('user-photo');
-                    img.src = user.user_metadata.avatar_url;
-                    img.classList.remove('hidden');
-                    document.getElementById('default-icon').classList.add('hidden');
+                // SAVE TO SUPABASE FOREVER
+                const { error } = await supabaseClient.auth.updateUser({
+                    data: { 
+                        full_name: inputs[0].value,
+                        withdrawal_number: inputs[1].value
+                    }
+                });
+        
+                if (!error) {
+                    isEditing = false;
+                    btn.textContent = "EDIT";
+                    btn.classList.replace('bg-green-600', 'bg-cyan-500');
+                    inputs.forEach(i => { i.disabled = true; i.classList.replace('text-white', 'text-gray-500'); });
+                    alert("Profile synced with SovaCore Cloud.");
                 }
             }
         }
-    
-        // 3. Navigation Logic (This fixes your "Not Defined" error)
+        
+        // --- 4. CURRENCY LOGIC ---
+        function updateCurrency() {
+            const selector = document.getElementById('currency-selector');
+            const symbol = selector.options[selector.selectedIndex].getAttribute('data-symbol');
+            const code = selector.value;
+        
+            // Update UI Displays
+            document.getElementById('current-currency-display').textContent = `${code} (${symbol})`;
+            
+            // Update all Dashboard Money amounts (Example logic)
+            // In a real app, you'd multiply by an exchange rate here
+            document.querySelectorAll('h3').forEach(h3 => {
+                if(h3.textContent.includes('$') || h3.textContent.includes('KSh')) {
+                     h3.textContent = `${symbol}0.00`;
+                }
+            });
+        
+            // Save preference to Supabase so it's there next time they login
+            supabaseClient.auth.updateUser({ data: { currency: code } });
+        }
+        
+        // --- 5. OFFICIAL REFERRALS FETCH ---
+        async function loadReferrals(userId) {
+            const { data, error } = await supabaseClient
+                .from('referrals') // Ensure your table name is exactly 'referrals'
+                .select('*')
+                .eq('referrer_id', userId);
+        
+            const tbody = document.querySelector('#referrals tbody');
+            if (data && data.length > 0) {
+                tbody.innerHTML = data.map(ref => `
+                    <tr class="border-b border-gray-800">
+                        <td class="p-4 text-white">${ref.client_name}</td>
+                        <td class="p-4">${ref.service}</td>
+                        <td class="p-4"><span class="px-2 py-1 rounded-full text-[10px] ${ref.status === 'Paid' ? 'bg-green-500/20 text-green-500' : 'bg-yellow-500/20 text-yellow-500'}">${ref.status}</span></td>
+                        <td class="p-4 text-right text-cyan-400 font-mono">$${ref.commission}</td>
+                    </tr>
+                `).join('');
+            }
+        }
+        
+        // Initialize
+        checkUser();
+            
+        // 6. Navigation Logic (This fixes your "Not Defined" error)
         function showSection(id) {
             // Hide all
             document.querySelectorAll('.dashboard-section').forEach(section => {
@@ -187,7 +275,7 @@
             }
         }
     
-        // 4. Edit/Save Toggle Logic
+        // 7. Edit/Save Toggle Logic
         let isEditing = false;
         function toggleEdit() {
             const btn = document.getElementById('edit-save-btn');
@@ -214,7 +302,7 @@
             }
         }
     
-        // 5. Image Upload Preview Logic
+        // 8. Image Upload Preview Logic
         const fileInput = document.getElementById('file-input');
         if (fileInput) {
             fileInput.onchange = function(e) {
@@ -242,6 +330,7 @@
 </body>
 
 </html>
+
 
 
 
