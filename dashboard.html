@@ -215,16 +215,16 @@
             const { data, error } = await supabaseClient
                 .from('Referrals')
                 .select('*')
-                .eq('referrer_id', userId);
+                .eq('user_id', userId);
     
             const tbody = document.querySelector('#referrals tbody');
             if (data && data.length > 0) {
                 tbody.innerHTML = data.map(ref => `
                     <tr class="border-b border-gray-800">
                         <td class="p-4 text-white">${ref.client_name}</td>
-                        <td class="p-4">${ref.service}</td>
+                        <td class="p-4">${ref.service_type}</td>
                         <td class="p-4"><span class="px-2 py-1 rounded-full text-[10px] ${ref.status === 'Paid' ? 'bg-green-500/20 text-green-500' : 'bg-yellow-500/20 text-yellow-500'}">${ref.status}</span></td>
-                        <td class="p-4 text-right text-cyan-400 font-mono">$${ref.commission}</td>
+                        <td class="p-4 text-right text-cyan-400 font-mono">$${ref.commission_amount}</td>
                     </tr>
                 `).join('');
             }
@@ -245,6 +245,7 @@
 </body>
 
 </html>
+
 
 
 
