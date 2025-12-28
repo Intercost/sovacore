@@ -240,11 +240,35 @@
     
         // Initial Start
         checkUser();
+
+       //7.  Sidebar Toggle for Mobile View
+        const menuToggle = document.getElementById('menu-toggle');
+        const sidebar = document.getElementById('sidebar');
+        
+        if (menuToggle && sidebar) {
+            menuToggle.addEventListener('click', (e) => {
+                // Prevent clicks from bubbling up
+                e.stopPropagation(); 
+                
+                // Toggle the translation classes
+                sidebar.classList.toggle('-translate-x-full');
+                sidebar.classList.toggle('translate-x-0');
+            });
+        
+            // Close sidebar when clicking anywhere else on the screen
+            document.addEventListener('click', (e) => {
+                if (!sidebar.contains(e.target) && !menuToggle.contains(e.target)) {
+                    sidebar.classList.add('-translate-x-full');
+                    sidebar.classList.remove('translate-x-0');
+                }
+            });
+        }
     </script>
                     
 </body>
 
 </html>
+
 
 
 
