@@ -43,9 +43,7 @@
             <section id="overview" class="dashboard-section">
                 <header class="flex flex-col md:flex-row justify-between items-start md:items-center mb-10 gap-4">
                     <h1 class="text-2xl font-bold">System Overview</h1>
-                    <div class="bg-gray-900 px-4 py-2 rounded-lg border border-gray-800 text-[10px] text-cyan-400 font-mono">NODE_STATUS: STABLE</div>
-                    <div>
-                        <h1 class="text-2xl font-bold" id="welcome-text">System Overview</h1>
+                    <div class="bg-gray-900 px-4 py-2 rounded-lg border border-gray-800 text-[10px] text-cyan-400 font-mono">NODE_STATUS: STABLE
                         <p class="text-gray-500 text-xs mt-1">Operational Currency: <span id="current-currency-display" class="text-cyan-400 font-bold">USD ($)</span></p>
                     </div>
                     <div class="flex gap-3">
@@ -136,101 +134,89 @@
    <script>
         const supabaseUrl = 'https://xhmsqsooabpcysacaroc.supabase.co';
         const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhobXNxc29vYWJwY3lzYWNhcm9jIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjY4NDU5NDksImV4cCI6MjA4MjQyMTk0OX0.jgTSVP1aPE6kTpp8IvNv-ezVAMmEo-qh7OMzOsBgBx4';
-        
-        // Use supabaseClient to avoid naming conflicts with the global library
         const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
     
-        // 1. Back Button Logic: Redirect to index instead of login
-        window.history.pushState(null, null, window.location.href);
-        window.onpopstate = function() {
-            window.location.href = 'index.html';
-        };
+        // 1. GLOBALS
+        let isEditing = false; // Declared only once here
     
-        // 2. Authentication & UI Population
+        // 2. CURRENCY LOGIC (Moved up so it's defined before use)
+        function updateCurrency() {
+            const selector = document.getElementById('currency-selector');
+            const symbol = selector.options[selector.selectedIndex].getAttribute('data-symbol');
+            const code = selector.value;
+    
+            document.getElementById('current-currency-display').textContent = `${code} (${symbol})`;
+            
+            document.querySelectorAll('h3').forEach(h3 => {
+                if(h3.textContent.includes('$') || h3.textContent.includes('KSh') || h3.textContent.includes('€') || h3.textContent.includes('£')) {
+                     h3.textContent = `${symbol}0.00`;
+                }
+            });
+    
+            // Store currency preference permanently in Supabase metadata
+            supabaseClient.auth.updateUser({ data: { currency: code } });
+        }
+    
+        // 3. AUTH & INITIALIZATION
         async function checkUser() {
             const { data: { user } } = await supabaseClient.auth.getUser();
             if (!user) {
                 window.location.href = 'login.html';
                 return;
             }
-        
-            // Load Permanent Data from Metadata
+    
             const meta = user.user_metadata;
-            document.getElementById('welcome-text').textContent = `Welcome, ${meta?.full_name || "Ambassador"}`;
+            const welcomeText = document.getElementById('welcome-text') || document.querySelector('h1');
+            welcomeText.textContent = `Welcome, ${meta?.full_name || "Ambassador"}`;
+            
             document.getElementById('profile-name').value = meta?.full_name || "";
             document.getElementById('profile-phone').value = meta?.withdrawal_number || "";
             document.getElementById('profile-email').value = user.email;
-            
-            // Set Currency
+    
             if(meta?.currency) {
                 document.getElementById('currency-selector').value = meta.currency;
-                updateCurrency(); // Refresh symbols on page
+                updateCurrency();
             }
-        
-            // Load Official Referrals from Supabase Table
+    
             loadReferrals(user.id);
         }
-        
-        // --- 3. PERMANENT PROFILE STORAGE ---
-        let isEditing = false;
+    
+        // 4. PROFILE PERMANENCE
         async function toggleEdit() {
             const btn = document.getElementById('edit-save-btn');
             const inputs = [document.getElementById('profile-name'), document.getElementById('profile-phone')];
             
-            if (!isEditing) {
-                // Switch to UI Edit Mode
-                isEditing = true;
-                btn.textContent = "SAVING...";
-                inputs.forEach(i => { i.disabled = false; i.classList.replace('text-gray-500', 'text-white'); });
+            isEditing = !isEditing;
+            
+            if (isEditing) {
                 btn.textContent = "CONFIRM CHANGES";
                 btn.classList.replace('bg-cyan-500', 'bg-green-600');
+                inputs.forEach(i => { i.disabled = false; i.classList.replace('text-gray-500', 'text-white'); });
             } else {
-                // SAVE TO SUPABASE FOREVER
+                // Permanent Update to Supabase
                 const { error } = await supabaseClient.auth.updateUser({
                     data: { 
                         full_name: inputs[0].value,
                         withdrawal_number: inputs[1].value
                     }
                 });
-        
+    
                 if (!error) {
-                    isEditing = false;
                     btn.textContent = "EDIT";
                     btn.classList.replace('bg-green-600', 'bg-cyan-500');
                     inputs.forEach(i => { i.disabled = true; i.classList.replace('text-white', 'text-gray-500'); });
-                    alert("Profile synced with SovaCore Cloud.");
+                    alert("Cloud Sync Successful.");
                 }
             }
         }
-        
-        // --- 4. CURRENCY LOGIC ---
-        function updateCurrency() {
-            const selector = document.getElementById('currency-selector');
-            const symbol = selector.options[selector.selectedIndex].getAttribute('data-symbol');
-            const code = selector.value;
-        
-            // Update UI Displays
-            document.getElementById('current-currency-display').textContent = `${code} (${symbol})`;
-            
-            // Update all Dashboard Money amounts (Example logic)
-            // In a real app, you'd multiply by an exchange rate here
-            document.querySelectorAll('h3').forEach(h3 => {
-                if(h3.textContent.includes('$') || h3.textContent.includes('KSh')) {
-                     h3.textContent = `${symbol}0.00`;
-                }
-            });
-        
-            // Save preference to Supabase so it's there next time they login
-            supabaseClient.auth.updateUser({ data: { currency: code } });
-        }
-        
-        // --- 5. OFFICIAL REFERRALS FETCH ---
+    
+        // 5. REFERRALS DATA
         async function loadReferrals(userId) {
             const { data, error } = await supabaseClient
-                .from('referrals') // Ensure your table name is exactly 'referrals'
+                .from('referrals')
                 .select('*')
                 .eq('referrer_id', userId);
-        
+    
             const tbody = document.querySelector('#referrals tbody');
             if (data && data.length > 0) {
                 tbody.innerHTML = data.map(ref => `
@@ -243,93 +229,23 @@
                 `).join('');
             }
         }
-        
-        // Initialize
-        checkUser();
-            
-        // 6. Navigation Logic (This fixes your "Not Defined" error)
+    
+        // 6. UI NAVIGATION
         function showSection(id) {
-            // Hide all
-            document.querySelectorAll('.dashboard-section').forEach(section => {
-                section.classList.add('hidden-section');
-            });
-            // Show selected
+            document.querySelectorAll('.dashboard-section').forEach(s => s.classList.add('hidden-section'));
             document.getElementById(id).classList.remove('hidden-section');
-            
-            // Update Sidebar UI
-            document.querySelectorAll('.nav-btn').forEach(btn => {
-                btn.classList.remove('active-link');
-                btn.classList.add('text-gray-500');
-            });
-            
-            // Highlight active link
-            if (event && event.currentTarget) {
-                event.currentTarget.classList.add('active-link');
-                event.currentTarget.classList.remove('text-gray-500');
-            }
-    
-            // Auto-close mobile sidebar
-            const sidebar = document.getElementById('sidebar');
-            if(window.innerWidth < 1024) {
-                sidebar.classList.add('-translate-x-full');
-            }
+            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active-link'));
+            if (event) event.currentTarget.classList.add('active-link');
         }
     
-        // 7. Edit/Save Toggle Logic
-        let isEditing = false;
-        function toggleEdit() {
-            const btn = document.getElementById('edit-save-btn');
-            const nameInput = document.getElementById('profile-name');
-            const phoneInput = document.getElementById('profile-phone');
-            
-            isEditing = !isEditing;
-            
-            if (isEditing) {
-                btn.textContent = "SAVE CHANGES";
-                btn.classList.replace('bg-cyan-500', 'bg-green-500');
-                nameInput.disabled = false;
-                phoneInput.disabled = false;
-                nameInput.classList.replace('text-gray-500', 'text-white');
-                phoneInput.classList.replace('text-gray-500', 'text-white');
-            } else {
-                btn.textContent = "EDIT";
-                btn.classList.replace('bg-green-500', 'bg-cyan-500');
-                nameInput.disabled = true;
-                phoneInput.disabled = true;
-                nameInput.classList.replace('text-white', 'text-gray-500');
-                phoneInput.classList.replace('text-white', 'text-gray-500');
-                alert("Changes saved to session!");
-            }
-        }
-    
-        // 8. Image Upload Preview Logic
-        const fileInput = document.getElementById('file-input');
-        if (fileInput) {
-            fileInput.onchange = function(e) {
-                const [file] = e.target.files;
-                if (file) {
-                    const img = document.getElementById('user-photo');
-                    img.src = URL.createObjectURL(file);
-                    img.classList.remove('hidden');
-                    document.getElementById('default-icon').classList.add('hidden');
-                }
-            };
-        }
-    
-        // Sidebar Toggle for Mobile
-        const menuToggle = document.getElementById('menu-toggle');
-        if (menuToggle) {
-            menuToggle.addEventListener('click', () => {
-                document.getElementById('sidebar').classList.toggle('-translate-x-full');
-            });
-        }
-    
-        // Initial load
+        // Initial Start
         checkUser();
     </script>
+                    
 </body>
 
 </html>
+
 
 
 
