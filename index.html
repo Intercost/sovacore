@@ -1,0 +1,667 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SovaCore | Autonomous Intelligence Solutions</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'sova-black': '#0a0a0a',
+                        'sova-cyan': '#00f0ff',
+                        'sova-dark': '#111111',
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'monospace'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>      
+        html {
+            scroll-behavior: smooth;
+        }
+
+        /* Default dark mode variables */
+        :root {
+            --primary-bg-color: #050505;
+            --secondary-bg-color: #0a0a0a; /* sova-black */
+            --tertiary-bg-color: #111111; /* sova-dark */
+            --primary-text-color: white;
+            --secondary-text-color: #9ca3af; /* gray-400 */
+            --border-base-color: #1f2937; /* gray-800 */
+            --terminal-bg-color: #111827; /* gray-900 */
+            --terminal-border-color: #374151; /* gray-700 */
+            --terminal-text-color: #4ade80; /* green-400 */
+            --accent-color: #00f0ff; /* sova-cyan */
+            --gradient-from-color: #22d3ee; /* cyan-400 */
+            --gradient-to-color: #2563eb; /* blue-600 */
+            --glow-shadow-color: rgba(0, 240, 255, 0.5);
+            --grid-line-color: #1a1a1a;
+            --button-default-bg: white;
+            --button-default-text: black;
+            --button-hover-bg: #e5e7eb; /* gray-200 */
+            --form-input-bg: #111827; /* gray-900 */
+            --form-input-border: #374151; /* gray-700 */
+            --form-input-text: white;
+            --footer-text-color: #6b7280; /* gray-500 */
+            --list-strong-text: white;
+        }
+
+        /* Light mode variables */
+        body.light-mode {
+            --primary-bg-color: #ffffff;
+            --secondary-bg-color: #f9fafb; /* light gray bg */
+            --tertiary-bg-color: #e2e8f0; /* slightly darker light gray */
+            --primary-text-color: #1a202c; /* dark gray text */
+            --secondary-text-color: #4a5568; /* medium gray */
+            --border-base-color: #e2e8f0; /* light gray border */
+            --terminal-bg-color: #edf2f7; /* lighter gray */
+            --terminal-border-color: #cbd5e1; /* even lighter gray */
+            --terminal-text-color: #16a34a; /* darker green */
+            --accent-color: #007bff; /* a more common light blue */
+            --gradient-from-color: #38b2ac; /* teal */
+            --gradient-to-color: #3182ce; /* blue */
+            --glow-shadow-color: rgba(0, 123, 255, 0.3);
+            --grid-line-color: #f0f4f8;
+            --button-default-bg: #1a202c; /* dark blue-gray for buttons */
+            --button-default-text: white;
+            --button-hover-bg: #2d3748; /* slightly darker */
+            --form-input-bg: #ffffff;
+            --form-input-border: #cbd5e1;
+            --form-input-text: #1a202c;
+            --footer-text-color: #a0aec0; /* light gray */
+            --list-strong-text: #1a202c;
+        }
+
+        /* Apply variables to base styles and override existing Tailwind classes */
+        body {
+            background-color: var(--primary-bg-color) !important;
+            color: var(--primary-text-color) !important;
+            transition: background-color 0.3s ease, color 0.3s ease; /* Smooth transition */
+        }
+        .glow-text {
+            text-shadow: 0 0 10px var(--glow-shadow-color) !important;
+        }
+        .grid-bg {
+            background-image: radial-gradient(var(--grid-line-color) 1px, transparent 1px) !important;
+        }
+
+        /* Specific Tailwind overrides for dark mode classes when in light mode */
+        body.light-mode .bg-sova-black\/90 { background-color: var(--secondary-bg-color) !important; }
+        body.light-mode .border-gray-800 { border-color: var(--border-base-color) !important; }
+        body.light-mode .text-gray-400 { color: var(--secondary-text-color) !important; }
+        body.light-mode .text-sova-cyan { color: var(--accent-color) !important; }
+        body.light-mode .bg-sova-dark { background-color: var(--tertiary-bg-color) !important; }
+        body.light-mode .bg-gray-900 { background-color: var(--terminal-bg-color) !important; }
+        body.light-mode .border-gray-700 { border-color: var(--terminal-border-color) !important; }
+        body.light-mode .text-green-400 { color: var(--terminal-text-color) !important; }
+        body.light-mode .terminal-cursor { color: var(--accent-color) !important; }
+        body.light-mode .text-transparent.bg-clip-text.bg-gradient-to-r.from-cyan-400.to-blue-600 {
+            background-image: linear-gradient(to right, var(--gradient-from-color), var(--gradient-to-color)) !important;
+        }
+        body.light-mode .shadow-\[0_0_20px_rgba\(0\,240\,255\,0\.3\)\] {
+            box-shadow: 0 0 20px var(--glow-shadow-color) !important;
+        }
+        body.light-mode .hover\:text-sova-cyan:hover { color: var(--accent-color) !important; }
+        body.light-mode .hover\:bg-sova-cyan:hover { background-color: var(--accent-color) !important; }
+        body.light-mode .hover\:text-black:hover { color: var(--primary-text-color) !important; }
+
+        /* Buttons */
+        body.light-mode .bg-sova-cyan.text-black { background-color: var(--accent-color) !important; color: white !important; }
+        body.light-mode .hover\:bg-cyan-300:hover { background-color: var(--accent-color) !important; }
+        body.light-mode .border.border-gray-600 { border-color: var(--secondary-text-color) !important; color: var(--primary-text-color) !important;}
+        body.light-mode .hover\:border-white:hover { border-color: var(--primary-text-color) !important; }
+        
+        /* Services section */
+        body.light-mode section#services.bg-sova-dark { background-color: var(--tertiary-bg-color) !important; }
+        body.light-mode .p-8.bg-gray-900\/50.border.border-gray-800 {
+            background-color: var(--secondary-bg-color) !important;
+            border-color: var(--border-base-color) !important;
+        }
+        body.light-mode .p-8.bg-gray-900\/50.border.border-gray-800.group:hover { border-color: var(--accent-color) !important; }
+
+        /* Technical specs section */
+        body.light-mode .bg-black.border-t.border-gray-900 {
+            background-color: var(--primary-bg-color) !important;
+            border-color: var(--border-base-color) !important;
+        }
+        body.light-mode .text-gray-300 { color: var(--secondary-text-color) !important; }
+        body.light-mode .text-white { color: var(--list-strong-text) !important; } /* For strong tags in lists */
+        body.light-mode .border-t.border-gray-900 { border-color: var(--border-base-color) !important; }
+
+        /* Ambassador section */
+        body.light-mode section#ambassador.bg-sova-dark { background-color: var(--tertiary-bg-color) !important; }
+        body.light-mode .bg-sova-cyan\/10 { background-color: rgba(0, 123, 255, 0.1) !important; }
+        body.light-mode .p-6.bg-gray-900\/30.border.border-dashed.border-gray-700 {
+            background-color: var(--terminal-bg-color) !important;
+            border-color: var(--terminal-border-color) !important;
+        }
+        body.light-mode input[type="range"] { background-color: var(--terminal-border-color) !important; accent-color: var(--accent-color) !important; }
+        body.light-mode .text-gray-500 { color: var(--secondary-text-color) !important; }
+
+        body.light-mode .bg-black.p-8.rounded-xl.border.border-gray-800 {
+            background-color: var(--secondary-bg-color) !important;
+            border-color: var(--border-base-color) !important;
+        }
+        body.light-mode input[type="text"],
+        body.light-mode input[type="email"],
+        body.light-mode input[type="number"], /* Added for new input type */
+        body.light-mode select,
+        body.light-mode textarea {
+            background-color: var(--form-input-bg) !important;
+            border-color: var(--form-input-border) !important;
+            color: var(--form-input-text) !important;
+        }
+        body.light-mode select { /* Specific style for select dropdowns to ensure text color */
+            color: var(--form-input-text) !important;
+        }
+        body.light-mode select option { /* Ensure option text color in light mode */
+            color: var(--form-input-text) !important;
+            background-color: var(--form-input-bg) !important;
+        }
+        body.light-mode select option[disabled] { /* Placeholder color */
+            color: var(--secondary-text-color) !important;
+        }
+        body.light-mode .focus\:border-sova-cyan:focus { border-color: var(--accent-color) !important; }
+        
+        /* Contact section */
+        body.light-mode .w-full.bg-white.text-black.font-bold {
+            background-color: var(--button-default-bg) !important;
+            color: var(--button-default-text) !important;
+        }
+        body.light-mode .hover\:bg-gray-200:hover { background-color: var(--button-hover-bg) !important; }
+
+        /* Chat bubble */
+        body.light-mode .bg-gray-900.border.border-sova-cyan {
+            background-color: var(--terminal-bg-color) !important;
+            border-color: var(--accent-color) !important;
+        }
+        body.light-mode .shadow-\[0_0_20px_rgba\(0\,240\,255\,0\.4\)\] {
+            box-shadow: 0 0 20px var(--glow-shadow-color) !important;
+        }
+        body.light-mode .bg-sova-cyan.p-4.rounded-full { background-color: var(--accent-color) !important; }
+
+        /* Footer */
+        body.light-mode footer.border-t.border-gray-800 { border-color: var(--border-base-color) !important; }
+        body.light-mode footer.text-gray-500 { color: var(--footer-text-color) !important; }
+
+        .terminal-cursor::after {
+            content: '█';
+            animation: blink 1s infinite;
+        }
+        @keyframes blink { 50% { opacity: 0; } }
+
+        @keyframes bounce-short {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-5px); }
+        }
+        .animate-bounce-short {
+            animation: bounce-short 2s ease-in-out infinite;
+        }
+
+    </style>
+</head>
+<body class="grid-bg min-h-screen flex flex-col">
+
+    <nav class="border-b border-gray-800 bg-sova-black/90 backdrop-blur-md sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
+            <div class="text-xl md:text-2xl font-bold font-mono tracking-tighter">
+                SOVA<span class="text-sova-cyan">CORE</span>
+            </div>
+            
+            <div class="hidden md:flex space-x-8 text-sm font-medium text-gray-400">
+                <a href="#services" class="hover:text-sova-cyan transition">VIEW OUR SERVICES</a>
+                <a href="case-studies.html" class="hover:text-sova-cyan transition">CASE STUDIES</a>
+                <a href="marketplace.html" class="hover:text-sova-cyan transition">MARKETPLACE</a>
+                <a href="pricing.html" class="hover:text-sova-cyan transition">PRICING</a>
+                <a href="#contact" class="hover:text-sova-cyan transition">START PROJECT</a>
+                <a href="#ambassador" class="hover:text-sova-cyan transition">JOIN THE CORE</a>
+                <a href="login.html" class="hover:text-sova-cyan transition">ACCESS PORTAL (LOGIN)</a>
+                <a href="workspace.html" class="hover:text-sova-cyan transition">WORKSPACE</a>
+                <button id="theme-toggle" class="hover:text-sova-cyan transition flex items-center gap-1">
+                    <svg id="sun-icon" class="h-5 w-5 hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.325 3.325l-.707.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+                    </svg>
+                    <svg id="moon-icon" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+                    </svg>
+                    <span class="sr-only">Toggle theme</span>
+                </button>
+            </div>
+
+            <button id="mobile-menu-button" class="md:hidden text-sova-cyan">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7" />
+                </svg>
+            </button>
+
+            <button class="hidden md:block border border-sova-cyan text-sova-cyan px-4 py-2 rounded text-xs font-mono hover:bg-sova-cyan hover:text-black transition">
+                STATUS: SOVA IS ONLINE
+            </button>
+        </div>
+
+        <div id="mobile-menu" class="hidden md:hidden bg-sova-dark border-b border-gray-800 px-6 py-6 space-y-4 font-mono text-sm">
+            <a href="#services" class="block text-gray-400 hover:text-sova-cyan">_VIEW OUR SERVICES</a>
+            <a href="case-studies.html" class="block text-gray-400 hover:text-sova-cyan">_CASE STUDIES</a>
+            <a href="marketplace.html" class="block text-gray-400 hover:text-sova-cyan">_MARKETPLACE</a>
+            <a href="pricing.html" class="block text-gray-400 hover:text-sova-cyan">_PRICING</a>
+            <a href="#contact" class="block text-gray-400 hover:text-sova-cyan">_START PROJECT</a>
+            <a href="#ambassador" class="block text-gray-400 hover:text-sova-cyan">_JOIN THE CORE</a>
+            <a href="login.html" class="block text-gray-400 hover:text-sova-cyan">_ACCESS PORTAL (LOGIN)</a>
+            <a href="workspace.html" class="block text-gray-400 hover:text-sova-cyan">_WORKSPACE</a>
+            <button id="mobile-theme-toggle" class="block text-gray-400 hover:text-sova-cyan pt-4 border-t border-gray-800 text-left flex items-center gap-2">
+                <svg id="mobile-sun-icon" class="h-5 w-5 hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.325 3.325l-.707.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+                </svg>
+                <svg id="mobile-moon-icon" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+                </svg>
+                <span>_TOGGLE THEME</span>
+            </button>
+            <div class="text-sova-cyan pt-4 border-t border-gray-800">Status: SOVA IS ONLINE</div>
+        </div>
+    </nav>
+
+    <section class="flex-grow flex items-center justify-center py-20 px-6 relative overflow-hidden">
+        <div class="max-w-4xl w-full text-center relative z-10">
+            <div class="mb-12 inline-block text-left bg-gray-900 border border-gray-700 p-4 rounded-lg shadow-2xl w-full max-w-lg mx-auto font-mono text-xs text-green-400 opacity-90">
+                <div id="terminal-output">
+                    > CONNECTING TO CORE...<br>
+                    > SOVA AGENT ACTIVE.<br>
+                </div>
+                <span class="terminal-cursor text-sova-cyan"></span>
+            </div>
+
+            <h1 class="text-5xl md:text-7xl font-bold mb-6 tracking-tight">
+                Automation at the speed of <br>
+                <span class="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-600 glow-text">Thinking.</span>
+            </h1>
+            <p class="text-gray-400 text-lg md:text-xl max-w-2xl mx-auto mb-10 leading-relaxed">
+                We are SovaCore. Powered by <strong>Sova</strong>, an autonomous AI agent capable of spawning bots, managing complex systems, and executing tasks in milliseconds.
+            </p>
+            <div class="flex flex-col sm:flex-row justify-center gap-4">
+                <a href="about.html" class="bg-sova-cyan text-black px-8 py-4 rounded font-bold hover:bg-cyan-300 transition shadow-[0_0_20px_rgba(0,240,255,0.3)]">
+                    What Is SovaCore?
+                </a>
+                <a href="login.html" class="bg-sova-cyan text-black px-8 py-4 rounded font-bold hover:bg-cyan-300 transition shadow-[0_0_20px_rgba(0,240,255,0.3)]">
+                    Login to Portal
+                </a>
+                <a href="#contact" class="border border-gray-600 px-8 py-4 rounded font-bold hover:border-white transition">
+                    Start a Project
+                </a>
+                <a href="#services" class="border border-gray-600 px-8 py-4 rounded font-bold hover:border-white transition">
+                    View Services
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <section id="services" class="py-20 bg-sova-dark border-t border-gray-800">
+        <div class="max-w-7xl mx-auto px-6">
+            <h2 class="text-3xl font-mono mb-12 border-l-4 border-sova-cyan pl-4">SYSTEM CAPABILITIES</h2>
+            
+            <div class="grid md:grid-cols-3 gap-8">
+                <div class="p-8 bg-gray-900/50 border border-gray-800 rounded hover:border-sova-cyan transition group">
+                    <div class="text-sova-cyan text-4xl mb-4 group-hover:scale-110 transition duration-300">🌐</div>
+                    <h3 class="text-xl font-bold mb-3">Next-Gen Web Development</h3>
+                    <p class="text-gray-400 text-sm">We don't just write code; we architect solutions. Sova accelerates the development of high-performance websites and web apps.</p>
+                </div>
+
+                <div class="p-8 bg-gray-900/50 border border-gray-800 rounded hover:border-sova-cyan transition group">
+                    <div class="text-sova-cyan text-4xl mb-4 group-hover:scale-110 transition duration-300">🕷️</div>
+                    <h3 class="text-xl font-bold mb-3">Data Mining & Extraction</h3>
+                    <p class="text-gray-400 text-sm">Data is only valuable when it wins markets. Sova doesn't just scrape; it extracts actionable competitive intelligence to help you find new customers and gain a strategic edge.</p>
+                </div>
+
+                <div class="p-8 bg-gray-900/50 border border-gray-800 rounded hover:border-sova-cyan transition group">
+                    <div class="text-sova-cyan text-4xl mb-4 group-hover:scale-110 transition duration-300">🔌</div>
+                    <h3 class="text-xl font-bold mb-3">API & System Integration</h3>
+                    <p class="text-gray-400 text-sm">Connect your disjointed software. We build bridges between apps to create a seamless, fully automated ecosystem.</p>
+                </div>
+
+                <div class="p-8 bg-gray-900/50 border border-gray-800 rounded hover:border-sova-cyan transition group">
+                    <div class="text-sova-cyan text-4xl mb-4 group-hover:scale-110 transition duration-300">🤖</div>
+                    <h3 class="text-xl font-bold mb-3">Digital Workforce (FTE Replacement)</h3>
+                    <p class="text-gray-400 text-sm">Deploy specialized AI agents that function as full-time digital employees. From customer success to form analysis, we replace high salary costs with autonomous performance.</p>
+                </div>
+
+                <div class="p-8 bg-gray-900/50 border border-gray-800 rounded hover:border-sova-cyan transition group">
+                    <div class="text-sova-cyan text-4xl mb-4 group-hover:scale-110 transition duration-300">🔒</div>
+                    <h3 class="text-xl font-bold mb-3">Business Continuity & Risk Mitigation</h3>
+                    <p class="text-gray-400 text-sm">Frame security as your essential digital insurance. We prevent the catastrophic costs of downtime and data breaches through aggressive hardening and continuous monitoring.</p>
+                </div>
+
+                <div class="p-8 bg-gray-900/50 border border-gray-800 rounded hover:border-sova-cyan transition group">
+                    <div class="text-sova-cyan text-4xl mb-4 group-hover:scale-110 transition duration-300">🎨</div>
+                    <h3 class="text-xl font-bold mb-3">UI/UX & Branding</h3>
+                    <p class="text-gray-400 text-sm">SovaCore designs for the future. From wireframes to high-conversion landing pages, we build interfaces that are intuitive and visually stunning.</p>
+                </div>
+
+                <div class="p-8 bg-gray-900/50 border border-gray-800 rounded hover:border-sova-cyan transition group">
+                    <div class="text-sova-cyan text-4xl mb-4 group-hover:scale-110 transition duration-300">⚡</div>
+                    <h3 class="text-xl font-bold mb-3">Rapid Bot Deployment</h3>
+                    <p class="text-gray-400 text-sm">Sova spawns autonomous bots instantly to handle repetitive tasks, scraping, or data entry at massive scale.</p>
+                </div>
+
+                <div class="p-8 bg-gray-900/50 border border-gray-800 rounded hover:border-sova-cyan transition group">
+                    <div class="text-sova-cyan text-4xl mb-4 group-hover:scale-110 transition duration-300">🧠</div>
+                    <h3 class="text-xl font-bold mb-3">Operational Efficiency & Time Reclaimed</h3>
+                    <p class="text-gray-400 text-sm">Quantify your growth. We automate manual workflows to reclaim hundreds of hours per week for your team, turning "lost time" into "billable capacity."</p>
+                </div>
+
+                <div class="p-8 bg-gray-900/50 border border-gray-800 rounded hover:border-sova-cyan transition group">
+                    <div class="text-sova-cyan text-4xl mb-4 group-hover:scale-110 transition duration-300">🛡️</div>
+                    <h3 class="text-xl font-bold mb-3">Autonomous Management</h3>
+                    <p class="text-gray-400 text-sm">Self-healing systems and continuous monitoring. Sova never sleeps, ensuring your operations are always online.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="py-20 bg-black border-t border-gray-900">
+        <div class="max-w-7xl mx-auto px-6">
+            <div class="grid md:grid-cols-2 gap-16">
+                
+                <div>
+                    <h3 class="text-sova-cyan font-mono text-sm mb-6 tracking-[0.2em]">// TECHNICAL_SPECS_01</h3>
+                    <h2 class="text-3xl font-bold mb-8">Development & Creative</h2>
+                    <ul class="space-y-4">
+                        <li class="flex items-start">
+                            <span class="text-sova-cyan mr-3">▹</span>
+                            <span class="text-gray-300"><strong class="text-white">Web Apps:</strong> Dashboards, Booking Systems, & Custom Admin Panels.</span>
+                        </li>
+                        <li class="flex items-start">
+                            <span class="text-sova-cyan mr-3">▹</span>
+                            <span class="text-gray-300"><strong class="text-white">Design Systems:</strong> Figma Prototypes, UI Kits, and Brand Identity.</span>
+                        </li>
+                        <li class="flex items-start">
+                            <span class="text-sova-cyan mr-3">▹</span>
+                            <span class="text-gray-300"><strong class="text-white">DevOps:</strong> Domain setup, Secure Hosting, and Email Config.</span>
+                        </li>
+                        <li class="flex items-start">
+                            <span class="text-sova-cyan mr-3">▹</span>
+                            <span class="text-gray-300"><strong class="text-white">Maintenance:</strong> Monthly Speed Optimization, Backups, and Bug Fixing.</span>
+                        </li>
+                    </ul>
+                </div>
+
+                <div>
+                    <h3 class="text-sova-cyan font-mono text-sm mb-6 tracking-[0.2em]">// TECHNICAL_SPECS_02</h3>
+                    <h2 class="text-3xl font-bold mb-8">Security & Intelligence</h2>
+                    <ul class="space-y-4">
+                        <li class="flex items-start">
+                            <span class="text-sova-cyan mr-3">▹</span>
+                            <span class="text-gray-300"><strong class="text-white">Security Hardening:</strong> SSL/HTTPS, Firewall Setup, & Malware Cleanup.</span>
+                        </li>
+                        <li class="flex items-start">
+                            <span class="text-sova-cyan mr-3">▹</span>
+                            <span class="text-gray-300"><strong class="text-white">Intelligence:</strong> Customer Support Bots, FAQ AI, & Form Analyzers.</span>
+                        </li>
+                        <li class="flex items-start">
+                            <span class="text-sova-cyan mr-3">▹</span>
+                            <span class="text-gray-300"><strong class="text-white">Advanced Scripts:</strong> Telegram/Discord Bots and Workflow Automation.</span>
+                        </li>
+                        <li class="flex items-start">
+                            <span class="text-sova-cyan mr-3">▹</span>
+                            <span class="text-gray-300"><strong class="text-white">Security Audits:</strong> Vulnerability scans and Phishing awareness training.</span>
+                        </li>
+                    </ul>
+                </div>
+
+            </div>
+
+            <div class="mt-20 pt-10 border-t border-gray-900 flex flex-wrap justify-center gap-8 opacity-50 grayscale hover:grayscale-0 transition duration-500">
+                <span class="font-mono text-sm">REACT</span>
+                <span class="font-mono text-sm">NODE.JS</span>
+                <span class="font-mono text-sm">PYTHON</span>
+                <span class="font-mono text-sm">TAILWIND</span>
+                <span class="font-mono text-sm">FIGMA</span>
+                <span class="font-mono text-sm">AWS</span>
+            </div>
+        </div>
+    </section>
+
+    <section id="ambassador" class="py-20 bg-sova-dark border-t border-gray-900">
+        <div class="max-w-7xl mx-auto px-6">
+            <div class="flex flex-col md:flex-row gap-12 items-center">
+                
+                <div class="md:w-1/2">
+                    <h2 class="text-4xl font-bold mb-6">Join the <span class="text-sova-cyan">Core Network</span></h2>
+                    <p class="text-gray-400 mb-8 leading-relaxed">
+                        We are looking for digital ambassadors to expand Sova's reach. No technical skills required—simply refer clients to SovaCore and earn.
+                    </p>
+                    
+                    <div class="space-y-6">
+                        <div class="flex items-center gap-4">
+                            <div class="bg-sova-cyan/10 p-3 rounded-full text-sova-cyan">💰</div>
+                            <div>
+                                <h4 class="font-bold text-white">20% Commission</h4>
+                                <p class="text-xs text-gray-500">Earn a percentage of every successful project you refer.</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-4">
+                            <div class="bg-sova-cyan/10 p-3 rounded-full text-sova-cyan">📈</div>
+                            <div>
+                                <h4 class="font-bold text-white">Monthly Payouts</h4>
+                                <p class="text-xs text-gray-500">Consistent earnings paid directly to you every month.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-10 p-6 bg-gray-900/30 border border-dashed border-gray-700 rounded-lg">
+                    <h4 class="font-mono text-sova-cyan text-sm mb-4 tracking-widest">PROFIT_CALCULATOR</h4>
+                    <label class="text-xs text-gray-400">PROJECT VALUE: $<span id="project-val-text">1000</span></label>
+                    <input type="range" min="100" max="5000" value="1000" step="100" class="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer accent-sova-cyan my-4" id="profit-slider">
+                    <div class="flex justify-between items-center mt-2">
+                        <span class="text-gray-500 text-xs">COMMISSION RATE: 20%</span>
+                        <span class="text-xl font-bold text-white">YOUR CUT: <span class="text-sova-cyan">$</span><span id="commission-text" class="text-sova-cyan">200</span></span>
+                    </div>
+                </div>
+                
+                <div class="md:w-1/2 w-full bg-black p-8 rounded-xl border border-gray-800">
+                    <h3 class="text-xl font-bold mb-6">Ambassador Application</h3>
+                    
+                    <form class="space-y-4" onsubmit="event.preventDefault(); window.location.href='login.html';">
+                        <div class="grid grid-cols-2 gap-4">
+                            <input type="text" placeholder="Full Name" required class="bg-gray-900 border border-gray-700 p-3 rounded focus:border-sova-cyan outline-none text-white text-sm">
+                            <input type="email" placeholder="Email Address" required class="bg-gray-900 border border-gray-700 p-3 rounded focus:border-sova-cyan outline-none text-white text-sm">
+                        </div>
+                        <select required class="w-full bg-gray-900 border border-gray-700 p-3 rounded focus:border-sova-cyan outline-none text-gray-400 text-sm">
+                            <option value="" disabled selected>How are you planning to add to the core?</option>
+                            <option>Coding Skills</option>
+                            <option>Social Media Marketing</option>
+                            <option>Direct Client Referrals</option>
+                            <option>Content Creation / Blogging</option>
+                        </select>
+                        <textarea placeholder="Tell us about your experience..." rows="3" class="w-full bg-gray-900 border border-gray-700 p-3 rounded focus:border-sova-cyan outline-none text-white text-sm"></textarea>
+                        
+                        <button type="submit" class="w-full bg-sova-cyan text-black font-bold py-3 rounded hover:bg-cyan-300 transition">
+                            SUBMIT APPLICATION
+                        </button>
+                    </form>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <section id="contact" class="py-20 px-6 text-center">
+        <div class="max-w-2xl mx-auto">
+            <h2 class="text-3xl font-bold mb-6">Ready to upgrade your workflow?</h2>
+            <p class="text-gray-400 mb-8">Tell us what you need. Sova will determine the most efficient execution path.</p>
+            <form class="space-y-4 text-left">
+                <input type="email" placeholder="Your Email" class="w-full p-4 bg-gray-900 border border-gray-700 rounded focus:border-sova-cyan focus:outline-none text-white" required>
+                
+                <select class="w-full p-4 bg-gray-900 border border-gray-700 rounded focus:border-sova-cyan focus:outline-none text-gray-400" required>
+                    <option value="" disabled selected>What level of value-based pricing best suits your needs?</option>
+                    <option value="basic">Basic Automation: Reclaim 10-20 hours/week (< $500/mo)</option>
+                    <option value="process_optimization">Process Optimization: Replace 0.5 - 1 FTE ($500 - $2k/mo)</option>
+                    <option value="transformation">Operational Transformation: Full Digital Workforce Deployment (> $2k/mo)</option>
+                </select>
+
+                <input type="number" placeholder="How many hours does your team currently spend on the repetitive task you want to automate? (e.g., 20)" class="w-full p-4 bg-gray-900 border border-gray-700 rounded focus:border-sova-cyan focus:outline-none text-white text-sm" min="0" required>
+                
+                <input type="text" placeholder="What is the estimated revenue impact of solving this problem? (e.g., $5000/month, improved customer retention)" class="w-full p-4 bg-gray-900 border border-gray-700 rounded focus:border-sova-cyan focus:outline-none text-white text-sm">
+
+                <textarea placeholder="Briefly describe the task you need automated or the problem you want to solve..." rows="4" class="w-full p-4 bg-gray-900 border border-gray-700 rounded focus:border-sova-cyan focus:outline-none text-white" required></textarea>
+                <button class="w-full bg-white text-black font-bold py-4 rounded hover:bg-gray-200 transition">
+                    INITIATE REQUEST
+                </button>
+            </form>
+        </div>
+    </section>
+
+    <div class="fixed bottom-6 right-6 z-[100] flex flex-col items-end font-sans">
+        <div id="sova-message" class="hidden mb-4 bg-gray-900 border border-sova-cyan p-4 rounded-lg shadow-2xl max-w-[280px] animate-bounce-short">
+            <p class="text-xs font-mono text-sova-cyan mb-1">SOVA_CORE IS SPEAKING...</p>
+            <p class="text-sm text-white">Hello! I am Sova. I’m currently helping businesses replace manual labor with AI agents. Want to see how many hours I can save your team this week?</p>
+        </div>
+
+        <button id="chat-bubble" class="relative bg-sova-cyan p-4 rounded-full shadow-[0_0_20px_rgba(0,240,255,0.4)] hover:scale-110 transition duration-300 group">
+            <span class="absolute top-0 right-0 h-3 w-3 bg-red-500 rounded-full border-2 border-black"></span>
+            
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-black" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
+            </svg>
+        </button>
+    </div>
+
+    <footer class="py-8 border-t border-gray-800 text-center text-gray-500 text-xs font-mono">
+        &copy; 2026 SOVACORE. POWERED BY SOVA A.I.
+    </footer>
+
+    <script>
+        // 1. Mobile Menu Logic
+        const mobileBtn = document.getElementById('mobile-menu-button');
+        const mobileMenu = document.getElementById('mobile-menu');
+        // Select all links inside the mobile menu
+        const mobileLinks = mobileMenu.querySelectorAll('a');
+
+        if (mobileBtn && mobileMenu) {
+            // Toggle menu when clicking the hamburger icon
+            mobileBtn.addEventListener('click', () => {
+                mobileMenu.classList.toggle('hidden');
+            });
+
+            // Loop through each link and add a click listener to close the menu
+            mobileLinks.forEach(link => {
+                link.addEventListener('click', () => {
+                    mobileMenu.classList.add('hidden');
+                });
+            });
+        }
+        // 2. Terminal Typewriter Logic (Keep your existing one)
+        
+        const terminal = document.getElementById('terminal-output');
+        const messages = [
+            "> ANALYZING SYSTEM ARCHITECTURE...",
+            "> OPTIMIZING WORKFLOWS...",
+            "> Hey there user, this is Sova speaking😊...",
+            "> READY FOR NEW ASSIGNMENT."
+        ];
+        
+        let msgIndex = 0;
+        
+        function typeWriter() {
+            if (msgIndex < messages.length) {
+                const div = document.createElement('div');
+                div.textContent = messages[msgIndex];
+                terminal.appendChild(div);
+                msgIndex++;
+                setTimeout(typeWriter, 1500); // Speed of new messages
+            }
+        }
+        
+        setTimeout(typeWriter, 1000);
+
+        //3. Sova Chat Bubble Logic
+        const bubble = document.getElementById('chat-bubble');
+        const messageBox = document.getElementById('sova-message');
+
+        // Toggle message when clicking the bubble
+        bubble.addEventListener('click', () => {
+            messageBox.classList.toggle('hidden');
+        });
+
+        // Auto-show greeting after 15 seconds
+        setTimeout(() => {
+            if (messageBox.classList.contains('hidden')) {
+                messageBox.classList.remove('hidden');
+            }
+        }, 15000);
+
+        //4. Calculator Logic
+        const slider = document.getElementById('profit-slider');
+        const valText = document.getElementById('project-val-text');
+        const commText = document.getElementById('commission-text');
+
+        slider.oninput = function() {
+            valText.innerHTML = this.value;
+            commText.innerHTML = (this.value * 0.20).toFixed(0);
+        }
+
+        // 5. Theme Toggle Logic
+        const themeToggle = document.getElementById('theme-toggle');
+        const mobileThemeToggle = document.getElementById('mobile-theme-toggle');
+        const body = document.body;
+
+        const sunIcon = document.getElementById('sun-icon');
+        const moonIcon = document.getElementById('moon-icon');
+        const mobileSunIcon = document.getElementById('mobile-sun-icon');
+        const mobileMoonIcon = document.getElementById('mobile-moon-icon');
+
+        function updateThemeIcons(isLightMode) {
+            if (isLightMode) {
+                sunIcon.classList.remove('hidden');
+                moonIcon.classList.add('hidden');
+                mobileSunIcon.classList.remove('hidden');
+                mobileMoonIcon.classList.add('hidden');
+            } else {
+                sunIcon.classList.add('hidden');
+                moonIcon.classList.remove('hidden');
+                mobileSunIcon.classList.add('hidden');
+                mobileMoonIcon.classList.remove('hidden');
+            }
+        }
+
+        // Check for saved theme preference or default to dark
+        const savedTheme = localStorage.getItem('theme');
+        if (savedTheme === 'light') {
+            body.classList.add('light-mode');
+            updateThemeIcons(true);
+        } else {
+            updateThemeIcons(false); // Default to dark mode icons
+        }
+
+        function toggleTheme() {
+            body.classList.toggle('light-mode');
+            const isLightMode = body.classList.contains('light-mode');
+            if (isLightMode) {
+                localStorage.setItem('theme', 'light');
+            } else {
+                localStorage.setItem('theme', 'dark');
+            }
+            updateThemeIcons(isLightMode);
+        }
+
+        if (themeToggle) {
+            themeToggle.addEventListener('click', toggleTheme);
+        }
+        if (mobileThemeToggle) {
+            mobileThemeToggle.addEventListener('click', toggleTheme);
+        }
+
+    </script>
+
+</body>
+
+</html>

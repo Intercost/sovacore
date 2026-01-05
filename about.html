@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SovaCore | The Mission</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { background: #020202; color: #e2e8f0; font-family: 'Inter', sans-serif; }
+        .glow-text { text-shadow: 0 0 10px rgba(34, 211, 238, 0.5); }
+        .glass-card { background: rgba(15, 15, 15, 0.7); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.05); }
+
+        /* Light Mode / Business View Styles */
+        body.light-mode {
+            background: #f0f2f5; /* Lighter background */
+            color: #333; /* Darker text */
+        }
+        body.light-mode .glow-text {
+            text-shadow: none;
+            color: #1a202c !important; /* Ensure it's dark */
+        }
+        body.light-mode .glass-card {
+            background: #ffffff;
+            backdrop-filter: none;
+            border: 1px solid #e0e0e0;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08); /* Subtle shadow */
+        }
+
+        /* Override Tailwind specific colors with !important */
+        body.light-mode .text-cyan-400 { color: #0a7bff !important; } /* A distinct blue for highlights */
+        body.light-mode .text-gray-500 { color: #666 !important; }
+        body.light-mode .hover\:text-cyan-400:hover { color: #0056b3 !important; }
+        body.light-mode .border-gray-800 { border-color: #d1d5db !important; } /* Lighter border */
+        body.light-mode .text-gray-400 { color: #555 !important; }
+        body.light-mode .text-white { color: #222 !important; }
+        body.light-mode .text-gray-600 { color: #777 !important; }
+        body.light-mode .border-gray-900 { border-color: #cbd5e1 !important; } /* Lighter border */
+
+        /* Button specific styles */
+        body.light-mode .bg-cyan-500 {
+            background-color: #0a7bff !important; /* Blue button */
+            color: #ffffff !important;
+        }
+        body.light-mode .hover\:bg-cyan-400:hover {
+            background-color: #0056b3 !important;
+        }
+        body.light-mode .shadow-cyan-500\/20 {
+            box-shadow: 0 4px 6px rgba(10, 123, 255, 0.2) !important;
+        }
+
+        /* Toggle button specific styles */
+        body.light-mode #theme-toggle {
+            border-color: #cbd5e1 !important;
+            color: #666 !important;
+        }
+        body.light-mode #theme-toggle:hover {
+            border-color: #0a7bff !important;
+            color: #0a7bff !important;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col items-center">
+
+    <nav class="w-full p-6 flex justify-between items-center max-w-6xl">
+        <h2 class="font-bold font-mono text-xl tracking-tighter">SOVA<span class="text-cyan-400">CORE</span></h2>
+        <div class="flex items-center space-x-4">
+            <button id="theme-toggle" class="px-3 py-1 text-xs rounded-full border border-gray-700 text-gray-400 hover:text-cyan-400 hover:border-cyan-400 transition-colors">
+                Light Mode
+            </button>
+            <a href="index.html" class="text-xs text-gray-500 hover:text-cyan-400 transition uppercase tracking-widest border-b border-gray-800 pb-1">Back to Home</a>
+        </div>
+    </nav>
+
+    <main class="max-w-4xl px-6 py-20 text-center">
+        <span class="text-cyan-400 text-[10px] uppercase tracking-[0.5em] mb-4 block">Initialization Phase</span>
+        <h1 class="text-4xl md:text-6xl font-bold mb-8 glow-text tracking-tighter">What is SovaCore?</h1>
+        
+        <p class="text-lg md:text-xl text-gray-400 leading-relaxed mb-12">
+            SovaCore is more than a platform; it is a <span class="text-white font-semibold">Neural Workspace</span> designed to bridge the gap between human ambition and AI execution. At the heart of our system is <span class="text-cyan-400">Sova</span>, an autonomous digital operator capable of building, managing, and scaling complex tasks in real-time.
+        </p>
+
+        <div class="grid md:grid-cols-3 gap-6 text-left">
+            <div class="glass-card p-6 rounded-2xl">
+                <div class="text-cyan-400 mb-4 text-2xl">01</div>
+                <h3 class="text-white font-bold mb-2 uppercase text-sm tracking-widest">Autonomous Agent</h3>
+                <p class="text-gray-500 text-xs leading-loose">Sova isn't a chatbot. She is a builder. She deploys worker-nodes to execute development and research tasks automatically.</p>
+            </div>
+            <div class="glass-card p-6 rounded-2xl">
+                <div class="text-cyan-400 mb-4 text-2xl">02</div>
+                <h3 class="text-white font-bold mb-2 uppercase text-sm tracking-widest">The Workspace</h3>
+                <p class="text-gray-500 text-xs leading-loose">A high-tech terminal where you can watch Sova work, view live task screenshots, and manage your AI fleet in real-time.</p>
+            </div>
+            <div class="glass-card p-6 rounded-2xl">
+                <div class="text-cyan-400 mb-4 text-2xl">03</div>
+                <h3 class="text-white font-bold mb-2 uppercase text-sm tracking-widest">Global Outreach</h3>
+                <p class="text-gray-500 text-xs leading-loose">Our Ambassador program empowers users to earn while helping others access the future of autonomous intelligence.</p>
+            </div>
+        </div>
+
+        <div class="mt-20 py-10 border-t border-gray-900">
+            <h2 class="text-xl font-bold mb-4">Ready to enter the Core?</h2>
+            <a href="login.html" class="inline-block bg-cyan-500 text-black px-10 py-4 rounded-full font-bold hover:bg-cyan-400 transition transform hover:scale-105 shadow-lg shadow-cyan-500/20">ACCESS_PORTAL</a>
+        </div>
+    </main>
+
+    <footer class="mt-auto p-10 text-[10px] text-gray-600 tracking-widest uppercase">
+        System Protocol © 2024 SovaCore Neural Network
+    </footer>
+
+    <script>
+        const themeToggleBtn = document.getElementById('theme-toggle');
+        const body = document.body;
+        const storedTheme = localStorage.getItem('theme');
+
+        // Set initial theme based on localStorage or default to dark
+        if (storedTheme === 'light-mode') {
+            body.classList.add('light-mode');
+            themeToggleBtn.textContent = 'Toggle Dark Mode';
+        } else {
+            // Default is dark mode
+            body.classList.remove('light-mode');
+            themeToggleBtn.textContent = 'Toggle Business View';
+        }
+
+        // Toggle theme on button click
+        themeToggleBtn.addEventListener('click', () => {
+            if (body.classList.contains('light-mode')) {
+                body.classList.remove('light-mode');
+                localStorage.setItem('theme', 'dark-mode');
+                themeToggleBtn.textContent = 'Toggle Business View';
+            } else {
+                body.classList.add('light-mode');
+                localStorage.setItem('theme', 'light-mode');
+                themeToggleBtn.textContent = 'Toggle Dark Mode';
+            }
+        });
+    </script>
+
+</body>
+</html>
