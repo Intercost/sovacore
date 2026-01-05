@@ -10,13 +10,14 @@
         body { background: #050505; color: white; font-family: 'Inter', sans-serif; }
         .active-link { background: rgba(34, 211, 238, 0.1); color: #22d3ee; border-left: 3px solid #22d3ee; }
         .hidden-section { display: none; }
+        .glass-panel { background: rgba(15, 15, 15, 0.7); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.05); }
     </style>
 </head>
 <body class="overflow-x-hidden">
 
     <div class="lg:hidden flex items-center justify-between p-4 border-b border-gray-900 bg-black sticky top-0 z-50">
         <h2 class="font-bold font-mono">SOVA<span class="text-cyan-400">CORE</span></h2>
-        <button id="menu-toggle" class="text-cyan-400">
+        <button id="menu-toggle" class="text-cyan-400 p-2">
             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path></svg>
         </button>
     </div>
@@ -34,7 +35,7 @@
             </nav>
 
             <div class="mt-auto pt-10">
-                <a href="index.html" class="text-red-500 text-xs font-bold hover:underline">LOGOUT SYSTEM</a>
+                <button onclick="handleLogout()" class="text-red-500 text-xs font-bold hover:underline bg-transparent border-none cursor-pointer">LOGOUT SYSTEM</button>
             </div>
         </aside>
 
@@ -42,18 +43,30 @@
             
             <section id="overview" class="dashboard-section">
                 <header class="flex flex-col md:flex-row justify-between items-start md:items-center mb-10 gap-4">
-                    <h1 class="text-2xl font-bold">System Overview</h1>
-                    <div class="bg-gray-900 px-4 py-2 rounded-lg border border-gray-800 text-[10px] text-cyan-400 font-mono">NODE_STATUS: STABLE</div>
+                    <div>
+                        <h1 id="welcome-text" class="text-2xl font-bold">System Overview</h1>
+                        <p class="text-gray-500 text-xs mt-1">Operational Currency: <span id="current-currency-display" class="text-cyan-400 font-bold">USD ($)</span></p>
+                    </div>
+                    <div class="flex gap-3">
+                        <select id="currency-selector" onchange="updateCurrency()" class="bg-black border border-gray-800 text-xs text-gray-400 p-2 rounded outline-none focus:border-cyan-400">
+                            <option value="USD" data-symbol="$">USD ($)</option>
+                            <option value="KES" data-symbol="KSh">KES (KSh)</option>
+                            <option value="EUR" data-symbol="€">EUR (€)</option>
+                            <option value="GBP" data-symbol="£">GBP (£)</option>
+                        </select>
+                        <div class="bg-gray-900 px-4 py-2 rounded-lg border border-gray-800 text-[10px] text-cyan-400 font-mono flex items-center">NODE_STATUS: STABLE</div>
+                    </div>
                 </header>
 
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-10">
                     <div class="bg-gray-900/50 p-6 rounded-xl border border-gray-800">
                         <p class="text-gray-500 text-xs uppercase tracking-widest">Available Balance</p>
-                        <h3 class="text-3xl font-bold mt-2 text-white">$0.00</h3>
+                        <h3 id="balance-display" class="text-3xl font-bold mt-2 text-white">$0.00</h3>
+                        <button onclick="openWithdrawModal()" class="mt-4 w-full bg-cyan-500 text-black text-[10px] font-bold py-2 rounded hover:bg-cyan-400 transition">REQUEST WITHDRAWAL</button>
                     </div>
                     <div class="bg-gray-900/50 p-6 rounded-xl border border-gray-800">
                         <p class="text-gray-500 text-xs uppercase tracking-widest">Total Earned</p>
-                        <h3 class="text-3xl font-bold mt-2 text-gray-400">$0.00</h3>
+                        <h3 id="total-earned-display" class="text-3xl font-bold mt-2 text-gray-400">$0.00</h3>
                     </div>
                     <div class="bg-gray-900/50 p-6 rounded-xl border border-gray-800">
                         <p class="text-gray-500 text-xs uppercase tracking-widest">Success Rate</p>
@@ -63,7 +76,21 @@
             </section>
 
             <section id="referrals" class="dashboard-section hidden-section">
-                <h2 class="text-2xl font-bold mb-6">Your Referrals</h2>
+                <h2 class="text-2xl font-bold mb-6">Referral Management</h2>
+                
+                <div class="bg-gray-900/50 border border-gray-800 p-6 rounded-xl mb-10">
+                    <h3 class="text-xs font-bold text-gray-400 mb-4 uppercase">Submit New Referral</h3>
+                    <div class="grid md:grid-cols-2 gap-4">
+                        <input type="text" id="ref-client-name" placeholder="Client Full Name" class="bg-black border border-gray-800 p-3 rounded text-sm outline-none focus:border-cyan-400">
+                        <select id="ref-service" class="bg-black border border-gray-800 p-3 rounded text-sm outline-none focus:border-cyan-400">
+                            <option value="Web Development">Web Development</option>
+                            <option value="UI/UX Design">UI/UX Design</option>
+                            <option value="SEO/Marketing">SEO/Marketing</option>
+                        </select>
+                    </div>
+                    <button onclick="submitNewReferral()" class="mt-4 bg-cyan-500 text-black font-bold px-6 py-2 rounded text-[10px]">SUBMIT TO SOVACORE</button>
+                </div>
+
                 <div class="bg-gray-900 rounded-xl border border-gray-800 overflow-x-auto">
                     <table class="w-full text-left">
                         <thead class="bg-black/50 text-gray-500 text-[10px] uppercase tracking-tighter">
@@ -76,7 +103,7 @@
                         </thead>
                         <tbody class="text-sm text-gray-400">
                             <tr>
-                                <td colspan="4" class="p-10 text-center italic">No active referrals found. Start sharing your link to earn commissions.</td>
+                                <td colspan="4" class="p-10 text-center italic text-gray-500">Loading referrals...</td>
                             </tr>
                         </tbody>
                     </table>
@@ -87,32 +114,32 @@
                 <h2 class="text-2xl font-bold mb-6">Profile Settings</h2>
                 <div class="bg-gray-900 p-6 md:p-8 rounded-xl border border-gray-800 max-w-2xl">
                     <div class="flex items-center gap-6 mb-8">
-                        <div class="w-20 h-20 bg-gray-800 rounded-full border-2 border-cyan-400 flex items-center justify-center overflow-hidden">
-                            <span class="text-gray-500 text-xs">NO IMG</span>
+                        <div id="profile-pic-container" class="w-20 h-20 bg-gray-800 rounded-full border-2 border-cyan-400 flex items-center justify-center overflow-hidden">
+                            <svg id="default-icon" class="w-10 h-10 text-gray-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"></path></svg>
+                            <img id="user-photo" class="hidden w-full h-full object-cover">
                         </div>
                         <div>
-                            <button class="bg-gray-800 text-white px-4 py-2 rounded text-xs hover:bg-gray-700 transition">Change Photo</button>
-                            <p class="text-[10px] text-gray-500 mt-2">Recommended: Square PNG/JPG</p>
+                            <input type="file" id="file-input" class="hidden" accept="image/*">
+                            <button onclick="document.getElementById('file-input').click()" class="bg-gray-800 text-white px-4 py-2 rounded text-xs hover:bg-gray-700 transition">Change Photo</button>
                         </div>
                     </div>
-
-                    <form class="space-y-6">
+            
+                    <form id="profile-form" class="space-y-6">
                         <div class="grid md:grid-cols-2 gap-4">
                             <div>
-                                <label class="text-xs text-gray-500 block mb-2 uppercase tracking-widest">Full Name</label>
-                                <input type="text" value="New Ambassador" class="w-full bg-black border border-gray-800 p-3 rounded outline-none focus:border-cyan-400 text-sm">
+                                <label class="text-xs text-gray-500 block mb-2 uppercase">Full Name</label>
+                                <input type="text" id="profile-name" disabled class="w-full bg-black border border-gray-800 p-3 rounded outline-none text-gray-500 text-sm">
                             </div>
                             <div>
-                                <label class="text-xs text-gray-500 block mb-2 uppercase tracking-widest">Withdrawal Number</label>
-                                <input type="text" placeholder="+123..." class="w-full bg-black border border-gray-800 p-3 rounded outline-none focus:border-cyan-400 text-sm">
+                                <label class="text-xs text-gray-500 block mb-2 uppercase">Withdrawal Number</label>
+                                <input type="text" id="profile-phone" disabled placeholder="Not set" class="w-full bg-black border border-gray-800 p-3 rounded outline-none text-gray-500 text-sm">
                             </div>
                         </div>
                         <div>
-                            <label class="text-xs text-gray-500 block mb-2 uppercase tracking-widest">Email Address</label>
-                            <input type="email" value="user@example.com" class="w-full bg-black border border-gray-800 p-3 rounded outline-none text-gray-600 text-sm" disabled>
-                            <p class="text-[9px] text-gray-600 mt-1">Email cannot be changed after registration.</p>
+                            <label class="text-xs text-gray-500 block mb-2 uppercase">Email Address</label>
+                            <input type="email" id="profile-email" disabled class="w-full bg-black border border-gray-800 p-3 rounded outline-none text-gray-600 text-sm">
                         </div>
-                        <button type="button" class="bg-cyan-500 text-black font-bold px-8 py-3 rounded text-sm hover:bg-cyan-400 transition">SAVE CHANGES</button>
+                        <button type="button" id="edit-save-btn" onclick="toggleEdit()" class="bg-cyan-500 text-black font-bold px-8 py-3 rounded text-sm hover:bg-cyan-400 transition">EDIT</button>
                     </form>
                 </div>
             </section>
@@ -120,58 +147,227 @@
         </main>
     </div>
 
-    <script>
+    <div id="withdraw-modal" class="hidden fixed inset-0 z-[100] bg-black/80 flex items-center justify-center p-4">
+        <div class="glass-panel w-full max-w-md p-6 rounded-xl border border-gray-800 bg-black">
+            <h2 class="text-xl font-bold mb-4 text-cyan-400">Withdraw Funds</h2>
+            <div class="space-y-4">
+                <div>
+                    <label class="text-[10px] text-gray-500 uppercase">Amount to Withdraw</label>
+                    <input type="number" id="withdraw-amount" placeholder="0.00" class="w-full bg-gray-900 border border-gray-800 p-2 rounded text-sm text-white outline-none focus:border-cyan-400">
+                </div>
+                <div>
+                    <label class="text-[10px] text-gray-500 uppercase">Withdrawal Number</label>
+                    <input type="text" id="withdraw-phone" class="w-full bg-gray-900 border border-gray-800 p-2 rounded text-sm text-white outline-none focus:border-cyan-400">
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="text-[10px] text-gray-500 uppercase">Name (Locked)</label>
+                        <input type="text" id="withdraw-name" disabled class="w-full bg-black border border-gray-900 p-2 rounded text-xs text-gray-600">
+                    </div>
+                    <div>
+                        <label class="text-[10px] text-gray-500 uppercase">Email (Locked)</label>
+                        <input type="text" id="withdraw-email" disabled class="w-full bg-black border border-gray-900 p-2 rounded text-xs text-gray-600">
+                    </div>
+                </div>
+                <div class="flex gap-3 mt-6">
+                    <button onclick="closeWithdrawModal()" class="flex-1 px-4 py-2 border border-gray-800 text-xs rounded">CANCEL</button>
+                    <button onclick="submitWithdrawal()" class="flex-1 px-4 py-2 bg-cyan-500 text-black font-bold text-xs rounded">REQUEST</button>
+                </div>
+            </div>
+        </div>
+    </div>
 
+    <script>
         const supabaseUrl = 'https://xhmsqsooabpcysacaroc.supabase.co';
         const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhobXNxc29vYWJwY3lzYWNhcm9jIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjY4NDU5NDksImV4cCI6MjA4MjQyMTk0OX0.jgTSVP1aPE6kTpp8IvNv-ezVAMmEo-qh7OMzOsBgBx4';
-        const supabase = supabase.createClient(supabaseUrl, supabaseKey);
+        const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
 
+        let isEditing = false;
+
+        // 1. INITIALIZATION & AUTH
         async function checkUser() {
-            const { data: { user } } = await supabase.auth.getUser();
-            
+            const { data: { user } } = await supabaseClient.auth.getUser();
             if (!user) {
-                // No user found, redirect to login
                 window.location.href = 'login.html';
-            } else {
-                // User is logged in, you can now load their specific data
-                console.log("Welcome:", user.email);
-                loadUserReferrals(user.id);
+                return;
             }
+
+            const meta = user.user_metadata;
+            document.getElementById('welcome-text').textContent = `Welcome, ${meta?.full_name || "Ambassador"}`;
+            document.getElementById('profile-name').value = meta?.full_name || "";
+            document.getElementById('profile-phone').value = meta?.withdrawal_number || "";
+            document.getElementById('profile-email').value = user.email;
+
+            if(meta?.currency) {
+                document.getElementById('currency-selector').value = meta.currency;
+                updateCurrency();
+            }
+
+            loadReferrals(user.id);
         }
 
-        // Run the check immediately when the page loads
-        checkUser();
-
-        // Toggle Mobile Menu
-        const menuToggle = document.getElementById('menu-toggle');
-        const sidebar = document.getElementById('sidebar');
-
-        menuToggle.addEventListener('click', () => {
-            sidebar.classList.toggle('-translate-x-full');
-        });
-
-        // Switch Sections
+        // 2. NAVIGATION & MOBILE SIDEBAR
         function showSection(id) {
-            // Hide all sections
-            document.querySelectorAll('.dashboard-section').forEach(section => {
-                section.classList.add('hidden-section');
-            });
-            // Show target section
+            document.querySelectorAll('.dashboard-section').forEach(s => s.classList.add('hidden-section'));
             document.getElementById(id).classList.remove('hidden-section');
             
-            // Update Active Link styling
             document.querySelectorAll('.nav-btn').forEach(btn => {
                 btn.classList.remove('active-link');
                 btn.classList.add('text-gray-500');
             });
-            event.currentTarget.classList.add('active-link');
-            event.currentTarget.classList.remove('text-gray-500');
 
-            // Close sidebar on mobile after clicking
+            if (event && event.currentTarget) {
+                event.currentTarget.classList.add('active-link');
+                event.currentTarget.classList.remove('text-gray-500');
+            }
+
+            // Close mobile sidebar after click
             if(window.innerWidth < 1024) {
+                const sidebar = document.getElementById('sidebar');
                 sidebar.classList.add('-translate-x-full');
+                sidebar.classList.remove('translate-x-0');
             }
         }
+
+        const menuToggle = document.getElementById('menu-toggle');
+        const sidebar = document.getElementById('sidebar');
+        if (menuToggle && sidebar) {
+            menuToggle.addEventListener('click', (e) => {
+                e.stopPropagation();
+                sidebar.classList.toggle('-translate-x-full');
+                sidebar.classList.toggle('translate-x-0');
+            });
+        }
+
+        // 3. CURRENCY LOGIC
+        function updateCurrency() {
+            const selector = document.getElementById('currency-selector');
+            const symbol = selector.options[selector.selectedIndex].getAttribute('data-symbol');
+            const code = selector.value;
+
+            document.getElementById('current-currency-display').textContent = `${code} (${symbol})`;
+            
+            document.querySelectorAll('h3').forEach(h3 => {
+                if(h3.id !== 'success-rate') {
+                    const currentVal = h3.textContent.replace(/[^0-9.]/g, '');
+                    h3.textContent = `${symbol}${currentVal || "0.00"}`;
+                }
+            });
+
+            supabaseClient.auth.updateUser({ data: { currency: code } });
+        }
+
+        // 4. REFERRALS (FETCH & SUBMIT)
+        async function loadReferrals(userId) {
+            const { data, error } = await supabaseClient
+                .from('Referrals')
+                .select('*')
+                .eq('user_id', userId);
+
+            const tbody = document.querySelector('#referrals tbody');
+            let totalAccumulated = 0;
+
+            if (data && data.length > 0) {
+                tbody.innerHTML = data.map(ref => {
+                    const amount = parseFloat(ref.commission_amount || 0);
+                    totalAccumulated += amount;
+                    return `
+                        <tr class="border-b border-gray-800">
+                            <td class="p-4 text-white">${ref.client_name}</td>
+                            <td class="p-4">${ref.service_type}</td>
+                            <td class="p-4"><span class="px-2 py-1 rounded-full text-[10px] ${ref.status === 'Paid' ? 'bg-green-500/20 text-green-500' : 'bg-yellow-500/20 text-yellow-500'}">${ref.status}</span></td>
+                            <td class="p-4 text-right text-cyan-400 font-mono">$${amount.toFixed(2)}</td>
+                        </tr>
+                    `;
+                }).join('');
+                
+                document.getElementById('total-earned-display').textContent = `$${totalAccumulated.toFixed(2)}`;
+            } else {
+                tbody.innerHTML = `<tr><td colspan="4" class="p-10 text-center italic text-gray-500">No active referrals found.</td></tr>`;
+            }
+        }
+
+        async function submitNewReferral() {
+            const clientName = document.getElementById('ref-client-name').value;
+            const service = document.getElementById('ref-service').value;
+            const { data: { user } } = await supabaseClient.auth.getUser();
+
+            if(!clientName) return alert("Please enter client name");
+
+            const { error } = await supabaseClient
+                .from('Referrals')
+                .insert([{ user_id: user.id, client_name: clientName, service_type: service, status: 'Pending', commission_amount: 0 }]);
+
+            if(!error) {
+                alert("Referral logged. We will notify you once potential earn is calculated.");
+                loadReferrals(user.id);
+                document.getElementById('ref-client-name').value = '';
+            }
+        }
+
+        // 5. WITHDRAWAL SYSTEM
+        function openWithdrawModal() {
+            const balanceText = document.getElementById('balance-display').textContent;
+            const currentBalance = parseFloat(balanceText.replace(/[^0-9.]/g, ''));
+            
+            if(currentBalance <= 0) return alert("You have no funds available to withdraw.");
+
+            document.getElementById('withdraw-name').value = document.getElementById('profile-name').value;
+            document.getElementById('withdraw-email').value = document.getElementById('profile-email').value;
+            document.getElementById('withdraw-phone').value = document.getElementById('profile-phone').value;
+            document.getElementById('withdraw-modal').classList.remove('hidden');
+        }
+
+        function closeWithdrawModal() {
+            document.getElementById('withdraw-modal').classList.add('hidden');
+        }
+
+        async function submitWithdrawal() {
+            const amount = parseFloat(document.getElementById('withdraw-amount').value);
+            const balanceText = document.getElementById('balance-display').textContent;
+            const currentBalance = parseFloat(balanceText.replace(/[^0-9.]/g, ''));
+
+            if (isNaN(amount) || amount > currentBalance || amount <= 0) {
+                alert("Invalid amount or insufficient balance.");
+                return;
+            }
+
+            alert("Request Received! We are processing your withdrawal request and will get back to you within 24hrs.");
+            // Logically you would send an email here or save to a "withdrawals" table
+            closeWithdrawModal();
+        }
+
+        // 6. PROFILE PERMANENCE
+        async function toggleEdit() {
+            const btn = document.getElementById('edit-save-btn');
+            const inputs = [document.getElementById('profile-name'), document.getElementById('profile-phone')];
+            
+            isEditing = !isEditing;
+            
+            if (isEditing) {
+                btn.textContent = "CONFIRM CHANGES";
+                btn.classList.replace('bg-cyan-500', 'bg-green-600');
+                inputs.forEach(i => { i.disabled = false; i.classList.replace('text-gray-500', 'text-white'); });
+            } else {
+                const { error } = await supabaseClient.auth.updateUser({
+                    data: { full_name: inputs[0].value, withdrawal_number: inputs[1].value }
+                });
+
+                if (!error) {
+                    btn.textContent = "EDIT";
+                    btn.classList.replace('bg-green-600', 'bg-cyan-500');
+                    inputs.forEach(i => { i.disabled = true; i.classList.replace('text-white', 'text-gray-500'); });
+                    alert("Cloud Sync Successful.");
+                }
+            }
+        }
+
+        function handleLogout() {
+            supabaseClient.auth.signOut().then(() => { window.location.href = 'index.html'; });
+        }
+
+        // Start
+        checkUser();
     </script>
 </body>
 </html>
