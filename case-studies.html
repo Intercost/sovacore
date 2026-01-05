@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        :root { --primary-bg-color: #050505; --primary-text-color: white; --border-base-color: #1f2937; --secondary-bg-color: #0a0a0a; }
+        body.light-mode { --primary-bg-color: #ffffff; --primary-text-color: #1a202c; --border-base-color: #e2e8f0; --secondary-bg-color: #f9fafb; }
+        body { background-color: var(--primary-bg-color) !important; color: var(--primary-text-color) !important; transition: 0.3s ease; }
+        .border-theme { border-color: var(--border-base-color) !important; }
+        .bg-secondary { background-color: var(--secondary-bg-color) !important; }
+    </style>
+</head>
+<body class="min-h-screen">
+    <nav class="border-b border-theme bg-secondary px-6 py-4 flex justify-between items-center">
+        <div class="flex items-center space-x-8">
+            <a href="index.html" class="text-xl font-bold font-mono">SOVA<span class="text-00f0ff" style="color:#00f0ff">SUCCESS</span></a>
+            <div class="flex space-x-6">
+                <a href="index.html" class="hover:opacity-75">Case Studies</a>
+                <a href="marketplace.html" class="hover:opacity-75">Marketplace</a>
+                <a href="pricing.html" class="hover:opacity-75">Pricing</a>
+            </div>
+        </div>
+        <button id="theme-toggle" class="p-2 border border-theme rounded">🌓</button>
+    </nav>
+
+    <main class="max-w-4xl mx-auto px-6 py-16">
+        <div class="text-center mb-16">
+            <h2 class="text-4xl font-bold mb-4">Core Success Stories</h2>
+            <p class="text-gray-400">Quantifiable business impact achieved through autonomous intelligence[cite: 99, 100].</p>
+        </div>
+
+        <div class="space-y-12">
+            <div class="p-8 bg-secondary border-l-4 border-sova-cyan rounded-r-lg">
+                <h3 class="text-2xl font-bold mb-4">Reclaiming 20 Hours for a Law Firm</h3>
+                <p class="text-gray-400 mb-6">SovaCore automated document filing, allowing staff to refocus on high-value billable work[cite: 101].</p>
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="text-center p-4 border border-theme rounded">
+                        <div class="text-2xl font-bold text-sova-cyan">20 hrs</div>
+                        <div class="text-xs text-gray-500 uppercase">Weekly Time Saved</div>
+                    </div>
+                    <div class="text-center p-4 border border-theme rounded">
+                        <div class="text-2xl font-bold text-sova-cyan">100%</div>
+                        <div class="text-xs text-gray-500 uppercase">Filing Accuracy</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="p-8 bg-secondary border-l-4 border-white rounded-r-lg">
+                <h3 class="text-2xl font-bold mb-4">Scaling Sales for E-Commerce</h3>
+                <p class="text-gray-400 mb-6">Our specialized Lead Gen bot increased a client's sales pipeline by 15% in just 30 days[cite: 102].</p>
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="text-center p-4 border border-theme rounded">
+                        <div class="text-2xl font-bold text-white">+15%</div>
+                        <div class="text-xs text-gray-500 uppercase">Pipeline Growth</div>
+                    </div>
+                    <div class="text-center p-4 border border-theme rounded">
+                        <div class="text-2xl font-bold text-white">30 Days</div>
+                        <div class="text-xs text-gray-500 uppercase">Implementation Time</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+    <script>
+        document.getElementById('theme-toggle').addEventListener('click', () => {
+            document.body.classList.toggle('light-mode');
+        });
+    </script>
+</body>
+</html>
