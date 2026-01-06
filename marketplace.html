@@ -12,14 +12,7 @@
 </head>
 <body class="min-h-screen">
     <nav class="border-b border-theme bg-secondary px-6 py-4 flex justify-between items-center">
-        <div class="flex items-center">
-            <div class="text-xl font-bold font-mono mr-8">SOVA<span class="text-00f0ff" style="color:#00f0ff">BOTS</span></div>
-            <div class="flex space-x-6">
-                <a href="case-studies.html" class="hover:text-00f0ff" style="transition:0.3s">Case Studies</a>
-                <a href="marketplace.html" class="text-00f0ff" style="color:#00f0ff; transition:0.3s">Marketplace</a>
-                <a href="pricing.html" class="hover:text-00f0ff" style="transition:0.3s">Pricing</a>
-            </div>
-        </div>
+        <div class="text-xl font-bold font-mono">SOVA<span class="text-00f0ff" style="color:#00f0ff">BOTS</span></div>
         <button id="theme-toggle" class="p-2 border border-theme rounded">🌓</button>
     </nav>
 
@@ -62,6 +55,42 @@
         </div>
     </main>
     <script>
+        const SOVA_URL = "https://xhmsqsooabpcysacaroc.supabase.co";
+        const SOVA_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhobXNxc29vYWJwY3lzYWNhcm9jIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjY4NDU5NDksImV4cCI6MjA4MjQyMTk0OX0.jgTSVP1aPE6kTpp8IvNv-ezVAMmEo-qh7OMzOsBgBx4"; // Use the same key from index.html
+        const sovaClient = supabase.createClient(SOVA_URL, SOVA_KEY);
+
+        async function loadMarketplace() {
+            const container = document.getElementById('product-grid');
+            
+            // Fetch only bots that Howard or Levisco have officially "Shipped"
+            const { data: bots, error } = await sovaClient
+                .from('bots')
+                .select('*')
+                .eq('status', 'deployed');
+
+            if (error) {
+                console.error("Error loading marketplace:", error);
+                return;
+            }
+
+            // Map the database bots to your beautiful UI cards
+            container.innerHTML = bots.map(bot => `
+                <div class="p-6 border border-theme bg-secondary rounded-lg group hover:border-[#00f0ff] transition-all duration-300">
+                    <div class="text-3xl mb-4">🤖</div>
+                    <h3 class="text-xl font-bold mb-2">${bot.name}</h3>
+                    <p class="text-sm text-gray-500 mb-6">${bot.marketing_description || 'Autonomous AI solution.'}</p>
+                    <div class="flex justify-between items-center">
+                        <span class="text-2xl font-mono font-bold">$${bot.price || '0'}</span>
+                        <a href="${bot.checkout_url}" target="_blank" class="px-4 py-2 bg-white text-black text-xs font-bold rounded uppercase tracking-wider hover:bg-[#00f0ff] transition-colors">
+                            Buy Now
+                        </a>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Initialize on load
+        loadMarketplace();
         document.getElementById('theme-toggle').addEventListener('click', () => {
             document.body.classList.toggle('light-mode');
         });

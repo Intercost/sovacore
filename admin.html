@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SovaCore | CEO Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;900&family=Inter:wght@300;600&display=swap');
+        
+        body {
+            background-color: #020205;
+            color: #e2e8f0;
+            font-family: 'Inter', sans-serif;
+            background-image: 
+                radial-gradient(at 0% 0%, rgba(188, 19, 254, 0.15) 0px, transparent 50%),
+                radial-gradient(at 100% 100%, rgba(0, 242, 255, 0.1) 0px, transparent 50%);
+            min-height: 100vh;
+        }
+
+        .cyber-card {
+            background: rgba(10, 10, 18, 0.8);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.8);
+            transition: all 0.3s ease;
+        }
+
+        .cyber-card:hover {
+            border: 1px solid rgba(188, 19, 254, 0.4);
+            transform: translateY(-2px);
+        }
+
+        /* Card Expansion Logic */
+        .details-content {
+            max-height: 0;
+            opacity: 0;
+            overflow: hidden;
+            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .cyber-card.is-expanded {
+            border-color: #00f2ff;
+            box-shadow: 0 0 30px rgba(0, 242, 255, 0.15);
+            background: rgba(20, 20, 35, 0.95);
+        }
+
+        .cyber-card.is-expanded .details-content {
+            max-height: 1000px; 
+            opacity: 1;
+            margin-top: 1.5rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .neon-text-blue { color: #2e13fe; text-shadow: 0 0 10px rgba(188, 19, 254, 0.5); font-family: 'Orbitron', sans-serif; }
+        .neon-text-cyan { color: #00f2ff; text-shadow: 0 0 10px rgba(0, 242, 255, 0.5); font-family: 'Orbitron', sans-serif; }
+        
+        .pulse-purple { animation: pulse 2s infinite; }
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(188, 19, 254, 0.4); }
+            70% { box-shadow: 0 0 0 10px rgba(188, 19, 254, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(188, 19, 254, 0); }
+        }
+    </style>
+</head>
+<body class="p-4 md:p-10">
+
+    <nav class="flex flex-col md:flex-row justify-between items-center mb-12 border-b border-white/10 pb-6 gap-6">
+        <div class="text-center md:text-left">
+            <h1 class="text-3xl font-black tracking-[0.2em] neon-text-blue uppercase">SovaCore</h1>
+            <div class="flex items-center justify-center md:justify-start gap-2 mt-1">
+                <span class="h-2 w-2 rounded-full bg-green-500 animate-ping"></span>
+                <p class="text-[10px] font-mono text-gray-400 uppercase tracking-widest">Autonomous Network Online</p>
+            </div>
+        </div>
+        
+        <div class="flex flex-wrap justify-center md:justify-end items-center gap-3 md:gap-4">
+            <div class="flex items-center gap-2">
+                <p class="text-[9px] font-mono text-gray-500 uppercase">Active Founder:</p>
+                <select id="founder-selector" class="bg-black/60 border border-purple-500/30 text-purple-400 text-[10px] font-mono rounded px-2 py-1 outline-none">
+                    <option value="Howard">Howard</option>
+                    <option value="Levisco">Levisco</option>
+                </select>
+            </div>
+
+            <button onclick="updateDashboard()" class="cyber-card px-4 py-2 rounded-full text-[10px] font-mono text-purple-400 border border-purple-500/30 hover:bg-purple-500/10 flex items-center gap-2 transition-all">
+                <i data-lucide="refresh-cw" class="w-3 h-3"></i> REFRESH DATA
+            </button>
+            
+            <div id="status-chip" class="cyber-card px-6 py-2 rounded-full text-[10px] font-mono neon-text-cyan border border-cyan-500/30 whitespace-nowrap">
+                SECURE LINK ESTABLISHED
+            </div>
+        </div>
+    </nav>
+
+    <div class="grid grid-cols-1 lg:grid-cols-4 gap-8">
+        
+        <aside class="lg:col-span-1 space-y-6">
+            <h2 class="text-xs font-bold tracking-[0.3em] text-gray-500 uppercase flex items-center gap-2">
+                <i data-lucide="shield-check" class="w-4 h-4 blue-500"></i> Personnel
+            </h2>
+            <div id="staff-list" class="space-y-3"></div>
+        </aside>
+
+        <main class="lg:col-span-3 space-y-6">
+            <section class="cyber-card p-6 rounded-xl border border-purple-500/30 mb-8">
+                <h2 class="text-xs font-bold tracking-[0.4em] neon-text-purple uppercase mb-4 flex items-center gap-2">
+                    <i data-lucide="message-square" class="w-4 h-4"></i> CEO Office
+                </h2>
+                
+                <div id="chat-window" class="h-48 overflow-y-auto mb-4 space-y-3 p-4 bg-black/40 rounded-lg border border-white/5 font-mono text-[11px]">
+                    <div class="text-gray-500 italic uppercase tracking-tighter">Initializing secure connection to Prime...</div>
+                </div>
+
+                <div class="flex flex-col md:flex-row gap-3">
+                    <input type="text" id="howard-input" placeholder="Enter command or proposal for Prime..." 
+                        class="w-full md:flex-1 bg-black/60 border border-white/10 rounded-lg px-4 py-2 text-xs focus:outline-none focus:border-purple-500 text-white">
+                    <button onclick="sendToCEO()" class="w-full md:w-auto px-6 py-2 bg-purple-600/20 border border-purple-500/50 rounded-lg text-[10px] font-bold uppercase hover:bg-purple-600/40 transition-all whitespace-nowrap">
+                        Send to Prime
+                    </button>
+                </div>
+            </section>
+
+            <div id="management-section" class="hidden space-y-4 mb-8">
+                <h2 class="text-xs font-bold tracking-[0.3em] text-orange-400 uppercase flex items-center gap-2">
+                    <i data-lucide="alert-triangle" class="w-4 h-4"></i> Management Handoff Required
+                </h2>
+                <div id="ready-for-market-list" class="grid grid-cols-1 gap-4"></div>
+            </div>
+
+            <div class="flex justify-between items-center">
+                <h2 class="text-xs font-bold tracking-[0.3em] text-gray-500 uppercase flex items-center gap-2">
+                    <i data-lucide="layers" class="w-4 h-4 text-cyan-500"></i> Active Operations
+                </h2>
+                <span id="job-count" class="text-[10px] font-mono text-gray-400">0 JOBS IN QUEUE</span>
+            </div>
+            <div id="project-grid" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6"></div>
+        </main>
+    </div>
+
+    <script>
+        const SOVA_URL = "https://xhmsqsooabpcysacaroc.supabase.co";
+        const SOVA_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhobXNxc29vYWJwY3lzYWNhcm9jIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjY4NDU5NDksImV4cCI6MjA4MjQyMTk0OX0.jgTSVP1aPE6kTpp8IvNv-ezVAMmEo-qh7OMzOsBgBx4";
+        const sovaClient = supabase.createClient(SOVA_URL, SOVA_KEY);
+        let seenIds = new Set();
+        let isFirstLoad = true;
+
+        async function securityCheck() {
+            const { data: { session } } = await sovaClient.auth.getSession();
+
+            // If they aren't even logged in, send them to login
+            if (!session) {
+                window.location.href = 'login.html';
+                return;
+            }
+
+            // Double-check if the logged-in user is actually in the Admin table
+            const { data: authorized } = await sovaClient
+                .from('authorized_admins')
+                .select('email')
+                .eq('email', session.user.email)
+                .single();
+
+            if (!authorized) {
+                // If they managed to get here but aren't an admin, kick them out
+                alert("CRITICAL: Unauthorized Access. Returning to Home.");
+                await sovaClient.auth.signOut();
+                window.location.href = 'index.html';
+            }
+        }
+
+        // Call this immediately before the dashboard loads any data
+        securityCheck();
+
+        // --- AUTH GATEKEEPER ---
+        async function checkAccess() {
+            const { data: { session }, error } = await sovaClient.auth.getSession();
+            
+            // 1. Check if logged in at all
+            if (!session || error) {
+                window.location.href = 'login.html';
+                return;
+            }
+
+            // 2. Verify email is an authorized CEO
+            const userEmail = session.user.email;
+            const { data: authorized } = await sovaClient
+                .from('authorized_admins')
+                .select('email')
+                .eq('email', userEmail)
+                .single();
+
+            if (!authorized) {
+                alert("ACCESS DENIED: You are not registered as a CEO.");
+                await sovaClient.auth.signOut();
+                window.location.href = 'login.html';
+            }
+        }
+
+        // Execute check immediately
+        checkAccess();
+
+        async function checkUser() {
+            const { data: { session } } = await sovaClient.auth.getSession();
+            
+            // If no active session, kick them back to the login page
+            if (!session) {
+                window.location.href = 'login.html';
+            } else {
+                console.log("Access Granted:", session.user.email);
+            }
+        }
+        // Run the check immediately when the page loads
+        checkUser();
+
+        async function updateDashboard() {
+            const statusChip = document.getElementById('status-chip');
+            statusChip.innerText = "SYNCING DATA...";
+
+            try {
+                // 1. Fetch Staff
+                const { data: staff } = await sovaClient.from('staff').select('*');
+                document.getElementById('staff-list').innerHTML = staff.map(s => `
+                    <div class="cyber-card p-4 rounded-lg flex items-center gap-4 border-l-2 ${s.status === 'ACTIVE' ? 'border-blue-500' : 'border-red-500'}">
+                        <div class="p-2 bg-blue-500/10 rounded-md">
+                            <i data-lucide="${s.role === 'CEO' ? 'crown' : 'bot'}" class="w-4 h-4 text-blue-400"></i>
+                        </div>
+                        <div>
+                            <p class="text-sm font-bold tracking-tight">${s.name}</p>
+                            <p class="text-[10px] text-gray-500 uppercase">${s.role}</p>
+                        </div>
+                    </div>
+                `).join('');
+
+                // 2. Fetch Market Handoffs (Bots from READY_FOR_MARKET)
+                const { data: readyProjects } = await sovaClient
+                    .from('bots')
+                    .select('*')
+                    .eq('status', 'READY_FOR_MARKET');
+
+                const marketSection = document.getElementById('management-section');
+                const marketList = document.getElementById('ready-for-market-list');
+                
+                if (readyProjects && readyProjects.length > 0) {
+                    marketSection.classList.remove('hidden');
+                    marketList.innerHTML = readyProjects.map(p => `
+                        <div class="cyber-card p-4 rounded-lg border border-orange-500/30 bg-orange-500/5 flex justify-between items-center">
+                            <div>
+                                <h4 class="text-sm font-bold text-white">${p.name}</h4>
+                                <p class="text-[10px] text-gray-400">Zipped and ready. Create Lemon Squeezy product now.</p>
+                            </div>
+                            <div class="flex gap-2">
+                                <a href="http://localhost:5001/download/${p.zip_path}" 
+                                   target="_blank"
+                                   class="px-3 py-1 bg-cyan-600/20 border border-cyan-500 text-cyan-400 text-[10px] font-bold rounded hover:bg-cyan-500/20"
+                                   onclick="window.open('https://app.lemonsqueezy.com/products', '_blank')">
+                                    DOWNLOAD ZIP
+                                </a>
+                                <button onclick="shipProject(${p.id})" 
+                                        class="px-3 py-1 bg-green-600/20 border border-green-500 text-green-400 text-[10px] font-bold rounded hover:bg-green-600/20">
+                                    SHIP IT
+                                </button>
+                            </div>
+                        </div>
+                    `).join('');
+                } else {
+                    marketSection.classList.add('hidden');
+                }
+
+                // 3. Fetch Projects
+                const { data: projects } = await sovaClient.from('projects').select('*').order('id', { ascending: false });
+                document.getElementById('job-count').innerText = `${projects.filter(p => p.status === 'QUEUED').length} JOBS IN QUEUE`;
+                
+                document.getElementById('project-grid').innerHTML = projects.map(p => `
+                    <div class="cyber-card p-6 rounded-xl flex flex-col border border-white/5" onclick="this.classList.toggle('is-expanded')">
+                        <div class="flex justify-between items-start mb-4">
+                            <span class="text-[9px] font-mono text-cyan-400/70">#${p.id}</span>
+                            <span class="px-2 py-0.5 rounded text-[8px] font-bold bg-white/5 border border-white/10 uppercase">
+                                ${p.status}
+                            </span>
+                        </div>
+                        <h3 class="text-md font-bold text-white mb-2 leading-tight">${p.project_name}</h3>
+                        <p class="text-[11px] text-gray-500 line-clamp-1">${p.description}</p>
+                        <div class="details-content">
+                            <h4 class="text-[10px] uppercase text-cyan-400 mb-2 font-bold tracking-widest">Full Documentation</h4>
+                            <p class="text-xs text-gray-300 leading-relaxed mb-4">${p.description}</p>
+                            <div class="grid grid-cols-2 gap-4 bg-black/30 p-3 rounded border border-white/5">
+                                <div>
+                                    <p class="text-[9px] text-gray-500 uppercase">Tech Stack</p>
+                                    <p class="text-[10px] text-purple-400 font-mono">${p.tech_stack}</p>
+                                </div>
+                                <div>
+                                    <p class="text-[9px] text-gray-500 uppercase">Last Sync</p>
+                                    <p class="text-[10px] text-gray-400 font-mono">${new Date(p.created_at || Date.now()).toLocaleDateString()}</p>
+                                </div>
+                            </div>
+                            ${p.github_url ? `
+                                <div class="mt-4 pt-4 border-t border-white/5">
+                                    <p class="text-[9px] text-gray-500 uppercase mb-1">Source Code</p>
+                                    <a href="${p.github_url}" target="_blank" class="text-[10px] text-cyan-400 hover:underline break-all font-mono">${p.github_url}</a>
+                                </div>
+                            ` : ''}
+                        </div>
+                        <div class="mt-6 flex items-center justify-between">
+                            <span class="text-[9px] font-mono text-purple-400 uppercase tracking-widest">Click to Expand</span>
+                            ${p.live_url ? `<a href="${p.live_url}" target="_blank" onclick="event.stopPropagation()" class="text-[10px] neon-text-cyan hover:underline font-bold">LIVE_LINK</a>` : ''}
+                        </div>
+                    </div>
+                `).join('');
+
+                await loadMessages();
+                statusChip.innerText = "SECURE LINK ESTABLISHED";
+                lucide.createIcons();
+            } catch (e) {
+                console.error("Critical Sync Error:", e);
+                document.getElementById('status-chip').innerText = "DATA SYNC FAILED";
+                document.getElementById('status-chip').classList.replace('neon-text-cyan', 'text-red-500');
+            }
+        }
+
+        // CHAT FIX: Ensured the display window updates immediately after insert
+        async function sendToCEO() {
+            const input = document.getElementById('howard-input');
+            const founder = document.getElementById('founder-selector').value;
+            const messageText = input.value.trim();
+            if (!messageText) return;
+            
+            try {
+                // Clear input immediately for better UX
+                input.value = '';
+                
+                // Perform insert
+                await sovaClient.from('communications').insert({ 
+                    sender: founder, 
+                    message: messageText 
+                });
+
+                // Force an immediate reload and scroll
+                await loadMessages(true); 
+            } catch (err) {
+                console.error("Send Error:", err);
+                alert("Failed to send message. Check console for details.");
+            }
+        }
+
+        async function shipProject(id) {
+            const url = prompt("Paste the Lemon Squeezy Checkout Link for this bot:");
+            if (!url) return;
+
+            // Update Ship Agent
+            const response = await fetch('http://localhost:5001/finalize', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ id: id, url: url })
+            });
+
+            if (response.ok) {
+                alert("Mission Accomplished! The bot is now live in the Marketplace.");
+                updateDashboard();
+            }
+        }
+
+        function typeWriter(el, text, i = 0) {
+            if (i < text.length) {
+                el.innerHTML += text.charAt(i);
+                setTimeout(() => {
+                    typeWriter(el, text, i + 1);
+                    // Keep scrolling down as we type
+                    const win = document.getElementById('chat-window');
+                    win.scrollTop = win.scrollHeight;
+                }, 30); // Adjust speed here (lower is faster)
+            }
+        }
+
+        async function loadMessages(forceScroll = false) {
+            const win = document.getElementById('chat-window');
+            
+            // Fetch the 20 newest messages
+            const { data: messages, error } = await sovaClient.from('communications')
+                .select('*')
+                .order('created_at', { ascending: false })
+                .limit(20);
+
+            if (error) {
+                console.warn("Sync warning:", error);
+                return;
+            }
+
+            if (messages) {
+                // Reverse them so the newest is at the bottom
+                const chronological = [...messages].reverse();
+
+                // On first load, display existing messages instantly so the window isn't empty
+                if (isFirstLoad) {
+                    win.innerHTML = chronological.map(m => {
+                        seenIds.add(m.id);
+                        const isFounder = ['Howard', 'Levisco'].includes(m.sender);
+                        return `
+                            <div class="mb-2">
+                                <span class="${isFounder ? 'text-cyan-400' : 'text-purple-400'} font-bold">[${m.sender}]</span>
+                                <span class="text-gray-300 ml-2">${m.message}</span>
+                            </div>`;
+                    }).join('');
+                    win.scrollTop = win.scrollHeight;
+                    isFirstLoad = false;
+                    return;
+                }
+
+                // Check for brand new messages
+                chronological.forEach(m => {
+                    if (!seenIds.has(m.id)) {
+                        seenIds.add(m.id);
+                        
+                        const msgDiv = document.createElement('div');
+                        msgDiv.className = 'mb-2';
+                        const isFounder = ['Howard', 'Levisco'].includes(m.sender);
+                        
+                        // Set up the message structure
+                        msgDiv.innerHTML = `<span class="${isFounder ? 'text-cyan-400' : 'text-purple-400'} font-bold">[${m.sender}]</span> `;
+                        
+                        const textSpan = document.createElement('span');
+                        textSpan.className = 'text-gray-300 ml-2';
+                        msgDiv.appendChild(textSpan);
+                        win.appendChild(msgDiv);
+
+                        if (!isFounder) {
+                            // Start typewriter for Prime/Agents
+                            typeWriter(textSpan, m.message);
+                        } else {
+                            // Founders appear instantly
+                            textSpan.innerText = m.message;
+                            win.scrollTop = win.scrollHeight;
+                        }
+                    }
+                });
+            }
+        }
+        
+        updateDashboard();
+        setInterval(() => loadMessages(false), 4000);
+    </script>
+</body>
+</html>

@@ -4,75 +4,74 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SovaCore | Access Portal</title>
+
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
     <style>
         body {
             background: #050505;
             color: white;
-            font-family: sans-serif;
             transition: background-color 0.3s ease, color 0.3s ease;
         }
         body.light-mode {
-            background: #f0f2f5; /* Light background */
-            color: #333; /* Darker text */
+            background: #f0f2f5;
+            color: #333;
         }
         .light-mode .bg-gray-900 {
-            background-color: #ffffff; /* Card background in light mode */
-            border-color: #e5e7eb; /* Lighter border for card */
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05); /* Lighter shadow */
-        }
-        .light-mode .text-gray-500 {
-            color: #6b7280; /* Adjust text gray for general use (p tags, toggle labels) */
-        }
-        .light-mode .text-gray-600 {
-            color: #9ca3af; /* Adjust text gray for "OR EMAIL" divider */
+            background-color: #ffffff;
+            border-color: #e5e7eb;
         }
         .light-mode .border-gray-800 {
-            border-color: #e5e7eb; /* Adjust border color for card and inputs */
+            border-color: #e5e7eb;
         }
         .light-mode .bg-black {
-            background-color: #f9fafb; /* Input background in light mode */
-            color: #1f2937; /* Input text color */
-        }
-        /* No specific override for .light-mode h1 as its color will inherit from body.light-mode color: #333; */
-        /* No specific override for .light-mode .text-black as it's already black, which works for light mode */
-        .light-mode .shadow-\[0_0_15px_rgba\(34\,211\,238\,0\.2\)\] { /* Targeting the specific shadow class for the button */
-            box-shadow: 0 0 15px rgba(34,211,238,0.3); /* Slightly adjusted shadow for light mode */
+            background-color: #f9fafb;
+            color: #111827;
         }
     </style>
 </head>
+
 <body class="flex items-center justify-center min-h-screen px-4">
-    <div class="absolute top-4 right-4 flex items-center space-x-2 z-10">
-        <span class="text-xs text-gray-500">Dark Mode</span>
-        <label for="theme-toggle" class="relative inline-flex items-center cursor-pointer">
-            <input type="checkbox" id="theme-toggle" class="sr-only peer">
-            <div class="w-11 h-6 bg-gray-700 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-cyan-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-cyan-600"></div>
-        </label>
-        <span class="text-xs text-gray-500">Light Mode</span>
+
+    <!-- THEME TOGGLE -->
+    <div class="absolute top-4 right-4 flex items-center gap-2">
+        <span class="text-xs text-gray-500">Dark</span>
+        <input type="checkbox" id="theme-toggle">
+        <span class="text-xs text-gray-500">Light</span>
     </div>
 
-    <div class="bg-gray-900 p-6 md:p-10 rounded-2xl border border-gray-800 w-full max-w-md shadow-2xl">
+    <!-- LOGIN CARD -->
+    <div class="bg-gray-900 p-8 rounded-2xl border border-gray-800 w-full max-w-md shadow-2xl">
+
         <div class="text-center mb-8">
-            <h1 class="text-2xl font-bold font-mono tracking-tighter">SOVA<span class="text-cyan-400">CORE</span></h1>
-            <p class="text-gray-500 text-sm mt-2" id="login-title">Access the Ambassador Portal</p>
+            <h1 class="text-2xl font-bold font-mono tracking-tighter">
+                SOVA<span class="text-cyan-400">CORE</span>
+            </h1>
+            <p class="text-gray-500 text-sm mt-2">Access the Ambassador Portal</p>
         </div>
-        
-        <button onclick="signInWithGoogle()" class="w-full flex items-center justify-center gap-3 bg-white text-black py-3 rounded-lg font-semibold hover:bg-gray-200 transition mb-6 text-sm md:text-base">
+
+        <!-- GOOGLE LOGIN -->
+        <button onclick="signInWithGoogle()" class="w-full flex items-center justify-center gap-3 bg-white text-black py-3 rounded-lg font-semibold hover:bg-gray-200 transition mb-6">
             <img src="https://www.svgrepo.com/show/355037/google.svg" class="w-5 h-5">
             Continue with Google
         </button>
 
-        <div class="relative flex py-5 items-center">
+        <div class="flex items-center my-6">
             <div class="flex-grow border-t border-gray-800"></div>
-            <span class="flex-shrink mx-4 text-gray-600 text-[10px] uppercase tracking-widest">OR EMAIL</span>
+            <span class="mx-4 text-gray-500 text-xs">OR EMAIL</span>
             <div class="flex-grow border-t border-gray-800"></div>
         </div>
 
-        <form onsubmit="event.preventDefault(); window.location.href='dashboard.html';" class="space-y-4">
-            <input type="email" placeholder="Email Address" required class="w-full bg-black border border-gray-800 p-3 rounded-lg outline-none focus:border-cyan-400 text-sm transition">
-            <input type="password" placeholder="Password" required class="w-full bg-black border border-gray-800 p-3 rounded-lg outline-none focus:border-cyan-400 text-sm transition">
-            <button class="w-full bg-cyan-500 text-black font-bold py-3 rounded-lg hover:bg-cyan-400 transition shadow-[0_0_15px_rgba(34,211,238,0.2)]">
+        <!-- EMAIL LOGIN -->
+        <form onsubmit="handleEmailLogin(event)" class="space-y-4">
+            <input id="email" type="email" placeholder="Email Address" required
+                class="w-full bg-black border border-gray-800 p-3 rounded-lg outline-none focus:border-cyan-400">
+
+            <input id="password" type="password" placeholder="Password" required
+                class="w-full bg-black border border-gray-800 p-3 rounded-lg outline-none focus:border-cyan-400">
+
+            <button class="w-full bg-cyan-500 text-black font-bold py-3 rounded-lg hover:bg-cyan-400 transition">
                 PROCEED TO CORE
             </button>
         </form>
@@ -82,60 +81,67 @@
         </p>
     </div>
 
-    <script>
-        const supabaseUrl = 'https://xhmsqsooabpcysacaroc.supabase.co';
-        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhobXNxc29vYWJwY3lzYWNhcm9jIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjY4NDU5NDksImV4cCI6MjA4MjQyMTk0OX0.jgTSVP1aPE6kTpp8IvNv-ezVAMmEo-qh7OMzOsBgBx4';
-        
-        // FIXED: Renamed variable to supabaseClient to avoid conflict
-        const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
+<script>
+/* ================= SUPABASE ================= */
+const supabaseUrl = 'https://xhmsqsooabpcysacaroc.supabase.co';
+const supabaseKey = 'YOUR_ANON_KEY_HERE';
+const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
 
-        async function signInWithGoogle() {
-            const { data, error } = await supabaseClient.auth.signInWithOAuth({
-                provider: 'google',
-                options: {
-                    // This line is "smart": it detects your Vercel URL automatically
-                    redirectTo: window.location.origin + '/dashboard.html'
-                }
-            });
-            
-            if (error) console.error('Error logging in:', error.message);
-        }
+/* ================= AUTH STATE LISTENER ================= */
+supabaseClient.auth.onAuthStateChange(async (event, session) => {
+    if (event === 'SIGNED_IN' && session) {
 
-        // Theme Toggle Logic
-        const themeToggle = document.getElementById('theme-toggle');
-        const body = document.body;
+        const email = session.user.email;
 
-        // Function to apply theme
-        function applyTheme(isLightMode) {
-            if (isLightMode) {
-                body.classList.add('light-mode');
-            } else {
-                body.classList.remove('light-mode');
-            }
-        }
+        const { data: admin } = await supabaseClient
+            .from('authorized_admins')
+            .select('email')
+            .eq('email', email)
+            .single();
 
-        // Load theme preference from localStorage
-        const savedTheme = localStorage.getItem('theme');
-        if (savedTheme === 'light') {
-            themeToggle.checked = true;
-            applyTheme(true);
+        if (admin) {
+            window.location.href = 'admin.html';
         } else {
-            // Default to dark if no preference or explicitly 'dark'
-            themeToggle.checked = false;
-            applyTheme(false);
+            alert('ACCESS DENIED');
+            await supabaseClient.auth.signOut();
+            window.location.href = 'index.html';
         }
+    }
+});
 
-        // Listen for toggle changes
-        themeToggle.addEventListener('change', () => {
-            if (themeToggle.checked) {
-                applyTheme(true);
-                localStorage.setItem('theme', 'light');
-            } else {
-                applyTheme(false);
-                localStorage.setItem('theme', 'dark');
-            }
-        });
-    </script>
+/* ================= EMAIL LOGIN ================= */
+async function handleEmailLogin(event) {
+    event.preventDefault();
+
+    const email = document.getElementById('email').value;
+    const password = document.getElementById('password').value;
+
+    const { error } = await supabaseClient.auth.signInWithPassword({
+        email,
+        password
+    });
+
+    if (error) {
+        alert(error.message);
+    }
+}
+
+/* ================= GOOGLE LOGIN ================= */
+async function signInWithGoogle() {
+    await supabaseClient.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+            redirectTo: window.location.origin + '/login.html'
+        }
+    });
+}
+
+/* ================= THEME TOGGLE ================= */
+const toggle = document.getElementById('theme-toggle');
+toggle.addEventListener('change', () => {
+    document.body.classList.toggle('light-mode', toggle.checked);
+});
+</script>
 
 </body>
 </html>

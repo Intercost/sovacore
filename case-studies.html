@@ -1,69 +1,660 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><script src="https://cdn.tailwindcss.com"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Case Studies - SovaCore</title>
     <style>
-        :root { --primary-bg-color: #050505; --primary-text-color: white; --border-base-color: #1f2937; --secondary-bg-color: #0a0a0a; }
-        body.light-mode { --primary-bg-color: #ffffff; --primary-text-color: #1a202c; --border-base-color: #e2e8f0; --secondary-bg-color: #f9fafb; }
-        body { background-color: var(--primary-bg-color) !important; color: var(--primary-text-color) !important; transition: 0.3s ease; }
-        .border-theme { border-color: var(--border-base-color) !important; }
-        .bg-secondary { background-color: var(--secondary-bg-color) !important; }
+        :root {
+            /* Dark Theme Defaults */
+            --color-bg-primary: #0a0e27;
+            --color-bg-secondary: #0f1535; /* Card background start */
+            --color-bg-tertiary: #1a2350; /* Card background end, stats background start */
+            --color-text-primary: #e0e0e0;
+            --color-heading: #ffffff;
+            --color-text-secondary: #b0b0b0; /* nav links, section text, testimonial text */
+            --color-text-tertiary: #a0a0a0; /* hero p, company industry, metric label, stat text */
+            --color-accent: #007bff; /* Changed from green #00ff88 to blue */
+            --color-border-primary: #1a1f3a;
+            --color-border-secondary: #1a3a52;
+            --color-accent-bg-light: rgba(0, 123, 255, 0.1); /* Changed from green rgba(0, 255, 136, 0.1) to blue */
+            --color-accent-bg-dark: rgba(0, 123, 255, 0.05); /* Changed from green rgba(0, 255, 136, 0.05) to blue */
+            --color-cta-text: #0a0e27;
+            --color-cta-hover-bg: #0056b3; /* Changed from green #00dd77 to blue */
+            --color-shadow-hover: 0 0 20px rgba(0, 123, 255, 0.2); /* Changed from green rgba(0, 255, 136, 0.2) to blue */
+            --color-footer-text: #888888;
+        }
+
+        body.light-theme {
+            /* Light Theme Overrides */
+            --color-bg-primary: #ffffff;
+            --color-bg-secondary: #f0f2f5;
+            --color-bg-tertiary: #e9ecef;
+            --color-text-primary: #333333;
+            --color-heading: #1a1a1a;
+            --color-text-secondary: #666666;
+            --color-text-tertiary: #888888;
+            --color-accent: #007bff; /* Already blue for light theme highlight */
+            --color-border-primary: #e0e0e0;
+            --color-border-secondary: #d0d0d0;
+            --color-accent-bg-light: rgba(0, 123, 255, 0.1);
+            --color-accent-bg-dark: rgba(0, 123, 255, 0.05);
+            --color-cta-text: #ffffff;
+            --color-cta-hover-bg: #0056b3;
+            --color-shadow-hover: 0 0 20px rgba(0, 123, 255, 0.2);
+            --color-footer-text: #666666;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: var(--color-bg-primary);
+            color: var(--color-text-primary);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            line-height: 1.6;
+            transition: background 0.3s ease, color 0.3s ease;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 2rem 5%;
+            border-bottom: 1px solid var(--color-border-primary);
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: var(--color-accent);
+        }
+
+        nav a {
+            color: var(--color-text-secondary);
+            text-decoration: none;
+            margin: 0 1.5rem;
+            font-size: 0.9rem;
+            transition: color 0.3s;
+        }
+
+        nav a:hover {
+            color: var(--color-accent);
+        }
+
+        .theme-toggle {
+            background: none;
+            border: none;
+            color: var(--color-accent);
+            cursor: pointer;
+            font-size: 1.2rem;
+            padding: 0.5rem;
+            margin-left: 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            transition: background 0.3s ease;
+        }
+
+        .theme-toggle:hover {
+            background: var(--color-accent-bg-dark);
+        }
+
+        .theme-toggle svg {
+            width: 24px;
+            height: 24px;
+            stroke: currentColor;
+            fill: none; /* Ensure no fill by default */
+        }
+
+        body.light-theme .theme-toggle .moon {
+            display: none;
+        }
+        body.light-theme .theme-toggle .sun {
+            display: inline-block;
+        }
+        body:not(.light-theme) .theme-toggle .sun {
+            display: none;
+        }
+        body:not(.light-theme) .theme-toggle .moon {
+            display: inline-block;
+        }
+
+
+        .hero {
+            text-align: center;
+            padding: 4rem 5%;
+            border-bottom: 1px solid var(--color-border-primary);
+        }
+
+        .hero h1 {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            color: var(--color-heading);
+        }
+
+        .hero p {
+            font-size: 1.1rem;
+            color: var(--color-text-tertiary);
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        .case-studies-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 2rem;
+            padding: 4rem 5%;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .case-study-card {
+            background: linear-gradient(135deg, var(--color-bg-secondary) 0%, var(--color-bg-tertiary) 100%);
+            border: 1px solid var(--color-border-secondary);
+            border-radius: 12px;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .case-study-card:hover {
+            border-color: var(--color-accent);
+            box-shadow: var(--color-shadow-hover);
+            transform: translateY(-5px);
+        }
+
+        .case-header {
+            background: var(--color-accent-bg-light);
+            border-bottom: 2px solid var(--color-accent);
+            padding: 2rem;
+        }
+
+        .company-name {
+            font-size: 1.3rem;
+            font-weight: bold;
+            color: var(--color-accent);
+            margin-bottom: 0.5rem;
+        }
+
+        .company-industry {
+            color: var(--color-text-tertiary);
+            font-size: 0.9rem;
+        }
+
+        .case-content {
+            padding: 2rem;
+        }
+
+        .challenge-section {
+            margin-bottom: 1.5rem;
+        }
+
+        .section-title {
+            color: var(--color-accent);
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 0.5rem;
+            font-weight: bold;
+        }
+
+        .section-text {
+            color: var(--color-text-secondary);
+            font-size: 0.95rem;
+            line-height: 1.6;
+        }
+
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin: 2rem 0;
+            padding: 1.5rem;
+            background: var(--color-accent-bg-dark);
+            border: 1px solid var(--color-border-secondary);
+            border-radius: 8px;
+        }
+
+        .metric {
+            text-align: center;
+        }
+
+        .metric-value {
+            font-size: 1.8rem;
+            color: var(--color-accent);
+            font-weight: bold;
+        }
+
+        .metric-label {
+            color: var(--color-text-tertiary);
+            font-size: 0.85rem;
+            margin-top: 0.5rem;
+            text-transform: uppercase;
+        }
+
+        .result-section {
+            margin-bottom: 1.5rem;
+        }
+
+        .testimonial {
+            background: var(--color-accent-bg-dark);
+            border-left: 3px solid var(--color-accent);
+            padding: 1.5rem;
+            border-radius: 4px;
+            margin-top: 1.5rem;
+        }
+
+        .testimonial-text {
+            color: var(--color-text-secondary);
+            font-style: italic;
+            margin-bottom: 0.8rem;
+        }
+
+        .testimonial-author {
+            color: var(--color-accent);
+            font-size: 0.9rem;
+            font-weight: bold;
+        }
+
+        .cta-button {
+            display: block;
+            margin-top: 1.5rem;
+            padding: 1rem;
+            background: var(--color-accent);
+            color: var(--color-cta-text);
+            text-align: center;
+            border: none;
+            border-radius: 6px;
+            font-weight: bold;
+            cursor: pointer;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+
+        .cta-button:hover {
+            background: var(--color-cta-hover-bg);
+            transform: translateY(-2px);
+        }
+
+        .stats-section {
+            background: linear-gradient(135deg, var(--color-bg-tertiary) 0%, var(--color-bg-secondary) 100%);
+            padding: 4rem 5%;
+            border-top: 1px solid var(--color-border-primary);
+            border-bottom: 1px solid var(--color-border-primary);
+        }
+
+        .stats-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 2rem;
+            text-align: center;
+        }
+
+        .stat {
+            padding: 2rem;
+        }
+
+        .stat-number {
+            font-size: 2.5rem;
+            color: var(--color-accent);
+            font-weight: bold;
+        }
+
+        .stat-text {
+            color: var(--color-text-tertiary);
+            margin-top: 0.5rem;
+            font-size: 0.95rem;
+        }
+
+        .footer {
+            background: var(--color-bg-primary);
+            border-top: 1px solid var(--color-border-primary);
+            padding: 2rem 5%;
+            text-align: center;
+            color: var(--color-footer-text);
+        }
+
+        .footer a {
+            color: var(--color-accent);
+            text-decoration: none;
+        }
+
+        @media (max-width: 768px) {
+            header {
+                flex-direction: column; /* Stack logo, nav, and theme-toggle */
+                padding: 1.5rem 5%; /* Reduce header padding */
+            }
+
+            .logo {
+                margin-bottom: 1rem; /* Space between logo and nav */
+            }
+
+            nav {
+                margin-bottom: 1rem; /* Space between nav and theme-toggle */
+                display: flex;
+                flex-wrap: wrap; /* Allow links to wrap if too many */
+                justify-content: center; /* Center nav links */
+                gap: 0.8rem; /* Smaller gap between links */
+            }
+
+            nav a {
+                margin: 0; /* Remove horizontal margin */
+                padding: 0.5rem 0.8rem; /* Add some padding to make links clickable */
+                font-size: 1rem;
+            }
+
+            .theme-toggle {
+                margin-left: 0; /* Remove left margin for theme toggle */
+            }
+
+            .hero h1 {
+                font-size: 1.8rem;
+            }
+
+            .hero p {
+                font-size: 1rem;
+            }
+
+            .case-studies-grid {
+                grid-template-columns: 1fr;
+                padding: 2rem 5%;
+            }
+
+            .metrics-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .stats-container {
+                grid-template-columns: 1fr; /* Stack stats on smaller screens */
+            }
+
+            .stats-section {
+                padding: 3rem 5%;
+            }
+
+            .stat {
+                padding: 1.5rem;
+            }
+        }
+
+        @media (max-width: 480px) { /* Even smaller screens */
+            nav a {
+                padding: 0.3rem 0.5rem;
+                font-size: 0.9rem;
+            }
+            .hero h1 {
+                font-size: 1.5rem;
+            }
+            .hero p {
+                font-size: 0.9rem;
+            }
+            .case-study-card {
+                padding: 0;
+            }
+            .case-header, .case-content {
+                padding: 1.5rem;
+            }
+            .metrics-grid {
+                padding: 1rem;
+            }
+            .stat-number {
+                font-size: 2rem;
+            }
+            .stat-text {
+                font-size: 0.85rem;
+            }
+        }
     </style>
 </head>
-<body class="min-h-screen">
-    <nav class="border-b border-theme bg-secondary px-6 py-4 flex justify-between items-center">
-        <div class="flex items-center space-x-8">
-            <a href="index.html" class="text-xl font-bold font-mono">SOVA<span class="text-00f0ff" style="color:#00f0ff">SUCCESS</span></a>
-            <div class="flex space-x-6">
-                <a href="index.html" class="hover:opacity-75">Case Studies</a>
-                <a href="marketplace.html" class="hover:opacity-75">Marketplace</a>
-                <a href="pricing.html" class="hover:opacity-75">Pricing</a>
+<body>
+    <header>
+        <div class="logo">SOVACORE</div>
+        <nav>
+            <a href="index.html">HOME</a>
+            <a href="case-studies.html">CASE STUDIES</a>
+            <a href="marketplace.html">MARKETPLACE</a>
+            <a href="pricing.html">PRICING</a>
+            <a href="login.html">LOGIN</a>
+        </nav>
+        <button id="theme-toggle" class="theme-toggle" aria-label="Toggle theme">
+            <svg class="sun" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="5"></circle>
+                <line x1="12" y1="1" x2="12" y2="3"></line>
+                <line x1="12" y1="21" x2="12" y2="23"></line>
+                <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                <line x1="1" y1="12" x2="3" y2="12"></line>
+                <line x1="21" y1="12" x2="23" y2="12"></line>
+                <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+            </svg>
+            <svg class="moon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+            </svg>
+        </button>
+    </header>
+
+    <section class="hero">
+        <h1>Success Stories: How SovaCore Transformed Businesses</h1>
+        <p>Real results from real clients. See how SovaCore's digital workforce replaced manual labor, saved thousands of hours, and drove measurable ROI.</p>
+    </section>
+
+    <section class="case-studies-grid">
+        <!-- Case Study 1: Law Firm -->
+        <div class="case-study-card">
+            <div class="case-header">
+                <div class="company-name">Legal Associates Inc.</div>
+                <div class="company-industry">Professional Services - Law Firm</div>
             </div>
-        </div>
-        <button id="theme-toggle" class="p-2 border border-theme rounded">🌓</button>
-    </nav>
+            <div class="case-content">
+                <div class="challenge-section">
+                    <div class="section-title">Challenge</div>
+                    <p class="section-text">20 hours per week spent on document filing, contract analysis, and legal research—time that could be billed to clients.</p>
+                </div>
 
-    <main class="max-w-4xl mx-auto px-6 py-16">
-        <div class="text-center mb-16">
-            <h2 class="text-4xl font-bold mb-4">Core Success Stories</h2>
-            <p class="text-gray-400">Quantifiable business impact achieved through autonomous intelligence[cite: 99, 100].</p>
-        </div>
-
-        <div class="space-y-12">
-            <div class="p-8 bg-secondary border-l-4 border-sova-cyan rounded-r-lg">
-                <h3 class="text-2xl font-bold mb-4">Reclaiming 20 Hours for a Law Firm</h3>
-                <p class="text-gray-400 mb-6">SovaCore automated document filing, allowing staff to refocus on high-value billable work[cite: 101].</p>
-                <div class="grid grid-cols-2 gap-4">
-                    <div class="text-center p-4 border border-theme rounded">
-                        <div class="text-2xl font-bold text-sova-cyan">20 hrs</div>
-                        <div class="text-xs text-gray-500 uppercase">Weekly Time Saved</div>
+                <div class="metrics-grid">
+                    <div class="metric">
+                        <div class="metric-value">20 hrs</div>
+                        <div class="metric-label">Per Week Wasted</div>
                     </div>
-                    <div class="text-center p-4 border border-theme rounded">
-                        <div class="text-2xl font-bold text-sova-cyan">100%</div>
-                        <div class="text-xs text-gray-500 uppercase">Filing Accuracy</div>
+                    <div class="metric">
+                        <div class="metric-value">6 FTE</div>
+                        <div class="metric-label">Equivalent Cost</div>
                     </div>
                 </div>
-            </div>
 
-            <div class="p-8 bg-secondary border-l-4 border-white rounded-r-lg">
-                <h3 class="text-2xl font-bold mb-4">Scaling Sales for E-Commerce</h3>
-                <p class="text-gray-400 mb-6">Our specialized Lead Gen bot increased a client's sales pipeline by 15% in just 30 days[cite: 102].</p>
-                <div class="grid grid-cols-2 gap-4">
-                    <div class="text-center p-4 border border-theme rounded">
-                        <div class="text-2xl font-bold text-white">+15%</div>
-                        <div class="text-xs text-gray-500 uppercase">Pipeline Growth</div>
+                <div class="result-section">
+                    <div class="section-title">Solution</div>
+                    <p class="section-text">Deployed Sova Document Analyzer + Legal Research Bot</p>
+                </div>
+
+                <div class="result-section">
+                    <div class="section-title">Results</div>
+                    <p class="section-text">Automated 95% of document filing and contract analysis. Freed up 20 billable hours per week per paralegal.</p>
+                </div>
+
+                <div class="metrics-grid">
+                    <div class="metric">
+                        <div class="metric-value">$240K</div>
+                        <div class="metric-label">Annual Savings</div>
                     </div>
-                    <div class="text-center p-4 border border-theme rounded">
-                        <div class="text-2xl font-bold text-white">30 Days</div>
-                        <div class="text-xs text-gray-500 uppercase">Implementation Time</div>
+                    <div class="metric">
+                        <div class="metric-value">6 mo</div>
+                        <div class="metric-label">ROI Timeline</div>
                     </div>
                 </div>
+
+                <div class="testimonial">
+                    <p class="testimonial-text">"SovaCore saved us the cost of hiring another full-time paralegal. Our billing hours increased 15% in the first quarter alone."</p>
+                    <p class="testimonial-author">— Sarah Martinez, Managing Partner</p>
+                </div>
+
+                <a href="#contact" class="cta-button">Get Similar Results</a>
             </div>
         </div>
-    </main>
+
+        <!-- Case Study 2: E-Commerce -->
+        <div class="case-study-card">
+            <div class="case-header">
+                <div class="company-name">StyleHub E-Commerce</div>
+                <div class="company-industry">Retail - Fashion & Apparel</div>
+            </div>
+            <div class="case-content">
+                <div class="challenge-section">
+                    <div class="section-title">Challenge</div>
+                    <p class="section-text">Customer support team overwhelmed with repetitive FAQs, product inquiries, and order status questions.</p>
+                </div>
+
+                <div class="metrics-grid">
+                    <div class="metric">
+                        <div class="metric-value">8K</div>
+                        <div class="metric-label">Monthly Tickets</div>
+                    </div>
+                    <div class="metric">
+                        <div class="metric-value">72 hrs</div>
+                        <div class="metric-label">Response Time</div>
+                    </div>
+                </div>
+
+                <div class="result-section">
+                    <div class="section-title">Solution</div>
+                    <p class="section-text">Deployed Sova Support Agent + FAQ Intelligence Bot</p>
+                </div>
+
+                <div class="result-section">
+                    <div class="section-title">Results</div>
+                    <p class="section-text">Handled 60% of customer inquiries autonomously. Reduced response time from 72 hours to under 2 minutes.</p>
+                </div>
+
+                <div class="metrics-grid">
+                    <div class="metric">
+                        <div class="metric-value">35%</div>
+                        <div class="metric-label">Ticket Reduction</div>
+                    </div>
+                    <div class="metric">
+                        <div class="metric-value">92%</div>
+                        <div class="metric-label">Satisfaction Rate</div>
+                    </div>
+                </div>
+
+                <div class="testimonial">
+                    <p class="testimonial-text">"Our customer satisfaction scores went up 12 points. The bot is now handling the boring stuff so our team can focus on complex issues and building relationships."</p>
+                    <p class="testimonial-author">— James Chen, Customer Success Manager</p>
+                </div>
+
+                <a href="#contact" class="cta-button">Scale Your Support</a>
+            </div>
+        </div>
+
+        <!-- Case Study 3: B2B Services -->
+        <div class="case-study-card">
+            <div class="case-header">
+                <div class="company-name">Insight Consulting Group</div>
+                <div class="company-industry">B2B Services - Management Consulting</div>
+            </div>
+            <div class="case-content">
+                <div class="challenge-section">
+                    <div class="section-title">Challenge</div>
+                    <p class="section-text">Sales team struggling to qualify 500+ leads per month. Many high-value opportunities were falling through the cracks.</p>
+                </div>
+
+                <div class="metrics-grid">
+                    <div class="metric">
+                        <div class="metric-value">500</div>
+                        <div class="metric-label">Monthly Leads</div>
+                    </div>
+                    <div class="metric">
+                        <div class="metric-value">8%</div>
+                        <div class="metric-label">Qualification Rate</div>
+                    </div>
+                </div>
+
+                <div class="result-section">
+                    <div class="section-title">Solution</div>
+                    <p class="section-text">Deployed Sova Lead Qualification Bot + Automated Follow-up Sequences</p>
+                </div>
+
+                <div class="result-section">
+                    <div class="section-title">Results</div>
+                    <p class="section-text">Automated lead qualification increased qualified leads by 25%. Sales team converted 40% more deals in 90 days.</p>
+                </div>
+
+                <div class="metrics-grid">
+                    <div class="metric">
+                        <div class="metric-value">+$1.2M</div>
+                        <div class="metric-label">New Revenue</div>
+                    </div>
+                    <div class="metric">
+                        <div class="metric-value">20%</div>
+                        <div class="metric-label">Higher Win Rate</div>
+                    </div>
+                </div>
+
+                <div class="testimonial">
+                    <p class="testimonial-text">"The bot qualified more leads in the first month than our team did in three months. We went from 8% to 22% qualification rate and closed $1.2M in new business."</p>
+                    <p class="testimonial-author">— David Patterson, VP of Sales</p>
+                </div>
+
+                <a href="#contact" class="cta-button">Grow Your Pipeline</a>
+            </div>
+        </div>
+    </section>
+
+    <section class="stats-section">
+        <div class="stats-container">
+            <div class="stat">
+                <div class="stat-number">47</div>
+                <div class="stat-text">Active Clients</div>
+            </div>
+            <div class="stat">
+                <div class="stat-number">12K+</div>
+                <div class="stat-text">Hours Reclaimed Monthly</div>
+            </div>
+            <div class="stat">
+                <div class="stat-number">$4.8M</div>
+                <div class="stat-text">Total Client Savings</div>
+            </div>
+            <div class="stat">
+                <div class="stat-number">94%</div>
+                <div class="stat-text">Client Satisfaction</div>
+            </div>
+        </div>
+    </section>
+
+    <footer class="footer">
+        <p>&copy; 2026 SovaCore. All rights reserved. | <a href="#">Privacy Policy</a></p>
+    </footer>
+
     <script>
-        document.getElementById('theme-toggle').addEventListener('click', () => {
-            document.body.classList.toggle('light-mode');
+        document.addEventListener('DOMContentLoaded', () => {
+            const themeToggle = document.getElementById('theme-toggle');
+            const body = document.body;
+
+            // Apply saved theme on load
+            const savedTheme = localStorage.getItem('theme');
+            if (savedTheme === 'light-theme') {
+                body.classList.add('light-theme');
+            } else {
+                // Default to dark theme if no preference or 'dark-theme' is saved
+                body.classList.remove('light-theme');
+                localStorage.setItem('theme', 'dark-theme'); // Explicitly set if no preference exists
+            }
+
+            themeToggle.addEventListener('click', () => {
+                if (body.classList.contains('light-theme')) {
+                    body.classList.remove('light-theme');
+                    localStorage.setItem('theme', 'dark-theme');
+                } else {
+                    body.classList.add('light-theme');
+                    localStorage.setItem('theme', 'light-theme');
+                }
+            });
         });
     </script>
 </body>
