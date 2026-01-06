@@ -131,7 +131,7 @@ async function signInWithGoogle() {
     await supabaseClient.auth.signInWithOAuth({
         provider: 'google',
         options: {
-            redirectTo: window.location.origin + '/login.html'
+            redirectTo: window.location.origin + '/amin.html'
         }
     });
 }
