@@ -3,210 +3,252 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SovaCore | Neural Workspace</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <title>Workspace - SOVACORE</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        body { background: #020202; color: #e2e8f0; font-family: 'JetBrains Mono', monospace; }
-        .glass-panel { background: rgba(15, 15, 15, 0.7); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.05); }
-        .glow-cyan { box-shadow: 0 0 20px rgba(34, 211, 238, 0.15); }
-        .status-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
-        ::-webkit-scrollbar { width: 4px; }
-        ::-webkit-scrollbar-thumb { background: #22d3ee; border-radius: 10px; }
-
-        /* Mobile Logic: Hide panes by default on small screens */
-        @media (max-width: 1023px) {
-            #pane-fleet, #pane-view { display: none; }
-            #pane-console { width: 100%; display: flex; }
-            
-            /* Utility class for the active tab */
-            .mobile-active { display: flex !important; flex: 1; width: 100% !important; }
-            .tab-active { color: #22d3ee; border-top: 2px solid #22d3ee; background: rgba(34, 211, 238, 0.05); }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
 
-        /* Ensure the main container doesn't squash columns on desktop */
-        @media (min-width: 1024px) {
-            #pane-fleet, #pane-console, #pane-view { display: flex !important; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background-color: #0a0e27;
+            color: #e0e0e0;
+            overflow: hidden;
         }
 
+        .navbar {
+            background-color: #0f1629;
+            padding: 20px;
+            border-bottom: 1px solid #1a2332;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .navbar-brand {
+            font-size: 24px;
+            font-weight: bold;
+            color: #00ff88;
+            letter-spacing: 2px;
+        }
+
+        .menu-toggle {
+            display: none;
+            flex-direction: column;
+            cursor: pointer;
+        }
+
+        .menu-toggle span {
+            width: 25px;
+            height: 3px;
+            background-color: #00ff88;
+            margin: 5px 0;
+            transition: 0.3s;
+        }
+
+        .sidebar {
+            position: fixed;
+            left: 0;
+            top: 60px;
+            width: 280px;
+            height: calc(100vh - 60px);
+            background-color: #0f1629;
+            border-right: 2px solid #00ff88;
+            border-radius: 0 20px 20px 0;
+            padding: 30px 0;
+            overflow-y: auto;
+            transition: 0.3s;
+            z-index: 1000;
+        }
+
+        .menu-item {
+            padding: 15px 30px;
+            color: #b0b0b0;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            transition: all 0.3s ease;
+            font-size: 14px;
+            font-weight: 500;
+            letter-spacing: 0.5px;
+            cursor: pointer;
+        }
+
+        .menu-item:hover {
+            background-color: rgba(0, 255, 136, 0.1);
+            color: #00ff88;
+            padding-left: 35px;
+        }
+
+        .menu-item i {
+            width: 20px;
+            text-align: center;
+            font-size: 16px;
+            color: #00ff88;
+        }
+
+        .menu-item.active {
+            background-color: rgba(0, 255, 136, 0.15);
+            color: #00ff88;
+            border-left: 3px solid #00ff88;
+            padding-left: 27px;
+        }
+
+        .menu-divider {
+            height: 1px;
+            background-color: #1a2332;
+            margin: 15px 0;
+        }
+
+        .toggle-theme {
+            padding: 15px 30px;
+            color: #b0b0b0;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            position: absolute;
+            bottom: 30px;
+            width: 100%;
+        }
+
+        .toggle-theme:hover {
+            color: #00ff88;
+        }
+
+        .toggle-theme i {
+            width: 20px;
+            text-align: center;
+            font-size: 16px;
+            color: #00ff88;
+        }
+
+        .status {
+            padding: 20px 30px;
+            color: #00ff88;
+            font-size: 12px;
+            font-weight: 600;
+            letter-spacing: 1px;
+            position: absolute;
+            bottom: 100px;
+            width: 100%;
+        }
+
+        .main-content {
+            margin-left: 280px;
+            padding: 40px;
+            height: calc(100vh - 60px);
+            overflow-y: auto;
+        }
+
+        @media (max-width: 768px) {
+            .menu-toggle {
+                display: flex;
+            }
+
+            .sidebar {
+                left: -280px;
+            }
+
+            .sidebar.active {
+                left: 0;
+            }
+
+            .main-content {
+                margin-left: 0;
+            }
+        }
     </style>
 </head>
-<body class="h-screen overflow-hidden flex flex-col">
-
-    <header class="h-14 border-b border-gray-900 flex items-center justify-between px-6 bg-black">
-        <div class="flex items-center gap-4">
-            <span class="text-cyan-400 font-bold tracking-tighter">SOVA_CORE v2.0</span>
-            <span class="text-[10px] bg-cyan-400/10 text-cyan-400 px-2 py-0.5 rounded border border-cyan-400/20">AGENT_ACTIVE</span>
+<body>
+    <div class="navbar">
+        <div class="navbar-brand">SOVACORE</div>
+        <div class="menu-toggle" id="menuToggle">
+            <span></span>
+            <span></span>
+            <span></span>
         </div>
-        <div class="flex gap-6 text-[10px] text-gray-500 uppercase tracking-widest">
-            <div>Latency: <span class="text-green-400">12ms</span></div>
-            <div>Neural Load: <span class="text-yellow-400">24%</span></div>
-            <a href="login.html" class="hover:text-white transition underline text-cyan-400">Login</a>
-            <a href="dashboard.html" class="hover:text-white transition underline">Return to Hub</a>
-        </div>
-    </header>
-
-    <div class="flex-1 flex overflow-hidden p-4 gap-4">
-        
-        <aside id="pane-fleet" class="w-72 flex flex-col gap-4">
-            <div class="glass-panel rounded-xl p-4 flex-1">
-                <h3 class="text-xs font-bold text-gray-400 mb-4 uppercase tracking-tighter">Active Fleet (Sub-Bots)</h3>
-                <div id="bot-list" class="space-y-3">
-                    <div class="bg-white/5 border border-white/10 p-3 rounded-lg">
-                        <div class="flex justify-between items-center mb-2">
-                            <span class="text-xs font-bold text-cyan-400">SOVA_PRIME</span>
-                            <div class="status-dot bg-green-500 animate-pulse"></div>
-                        </div>
-                        <p class="text-[9px] text-gray-500">Task: Coordinating Workflow</p>
-                    </div>
-                </div>
-                <button onclick="spawnBot()" class="w-full mt-4 border border-dashed border-gray-700 py-2 rounded text-[10px] hover:border-cyan-400 transition text-gray-500 hover:text-cyan-400">
-                    + SPAWN_WORKER_NODE
-                </button>
-            </div>
-        </aside>
-
-        <main id="pane-console" class="flex-1 flex flex-col gap-4">
-            <div class="glass-panel rounded-xl h-1/3 p-4 overflow-y-auto font-mono text-[10px]" id="system-logs">
-                <p class="text-gray-600">[SYSTEM] Initializing Neural Workspace...</p>
-                <p class="text-cyan-400">[SOVA] Waiting for instructions. Ready to deploy.</p>
-            </div>
-
-            <div class="glass-panel rounded-xl flex-1 flex flex-col p-4">
-                <div id="chat-window" class="flex-1 overflow-y-auto space-y-4 mb-4 text-sm">
-                    <div class="flex gap-3">
-                        <div class="w-6 h-6 bg-cyan-400 rounded-sm flex-shrink-0 flex items-center justify-center text-black font-bold text-[10px]">S</div>
-                        <div class="text-gray-300">Hello! I am Sova. Define the project parameters, and I will begin the build process.</div>
-                    </div>
-                </div>
-                <div class="relative">
-                    <input type="text" id="user-input" placeholder="Enter task command..." class="w-full bg-black border border-gray-800 p-4 rounded-lg outline-none focus:border-cyan-400 text-sm">
-                    <button onclick="sendMessage()" class="absolute right-4 top-3 text-cyan-400 hover:text-white">SEND_CMD</button>
-                </div>
-            </div>
-        </main>
-
-        <section id="pane-view" class="w-96 flex flex-col gap-4">
-            <div class="glass-panel rounded-xl flex-1 flex flex-col overflow-hidden">
-                <div class="p-3 border-b border-white/5 flex justify-between items-center">
-                    <span class="text-[10px] uppercase font-bold text-gray-500">Live_Viewport_Capture</span>
-                    <span class="text-[9px] text-cyan-400">REFRESHING...</span>
-                </div>
-                <div class="flex-1 bg-gray-900 relative flex items-center justify-center overflow-hidden">
-                    <div id="screenshot-placeholder" class="text-center">
-                        <div class="w-12 h-12 border-2 border-dashed border-gray-700 rounded-full animate-spin mb-4 mx-auto"></div>
-                        <p class="text-xs text-gray-600">Waiting for render...</p>
-                    </div>
-                    <img id="task-screenshot" class="hidden absolute inset-0 w-full h-full object-cover">
-                </div>
-                <div class="p-4 bg-black/40 text-[10px]">
-                    <p class="text-gray-400">CURRENT_URI: <span class="text-cyan-400">localhost:3000/staging</span></p>
-                </div>
-            </div>
-        </section>
-
     </div>
 
-    <nav class="lg:hidden h-16 border-t border-gray-900 bg-black flex items-center shrink-0">
-        <button onclick="switchTab('fleet')" id="btn-fleet" class="flex-1 h-full flex items-center justify-center text-[10px] text-gray-500 uppercase font-bold tracking-tighter">
-            Fleet
-        </button>
-        <button onclick="switchTab('console')" id="btn-console" class="flex-1 h-full flex items-center justify-center text-[10px] uppercase font-bold tracking-tighter tab-active">
-            Console
-        </button>
-        <button onclick="switchTab('view')" id="btn-view" class="flex-1 h-full flex items-center justify-center text-[10px] text-gray-500 uppercase font-bold tracking-tighter">
-            Viewport
-        </button>
-    </nav>
+    <div class="sidebar" id="sidebar">
+        <!-- Added icons to each menu item -->
+        <a href="/" class="menu-item active">
+            <i class="fas fa-home"></i>
+            VIEW OUR SERVICES
+        </a>
+        <a href="/case-studies.html" class="menu-item">
+            <i class="fas fa-book"></i>
+            CASE STUDIES
+        </a>
+        <a href="/marketplace.html" class="menu-item">
+            <i class="fas fa-shopping-cart"></i>
+            MARKETPLACE
+        </a>
+        <a href="/pricing.html" class="menu-item">
+            <i class="fas fa-tag"></i>
+            PRICING
+        </a>
+        <a href="#" class="menu-item">
+            <i class="fas fa-rocket"></i>
+            START PROJECT
+        </a>
+        <a href="#" class="menu-item">
+            <i class="fas fa-users"></i>
+            JOIN THE CORE
+        </a>
+        <a href="/dashboard.html" class="menu-item">
+            <i class="fas fa-sign-in-alt"></i>
+            ACCESS PORTAL (LOGIN)
+        </a>
+        <a href="/workspace.html" class="menu-item">
+            <i class="fas fa-briefcase"></i>
+            WORKSPACE
+        </a>
+
+        <div class="menu-divider"></div>
+
+        <div class="status">
+            Status: SOVA IS ONLINE
+        </div>
+
+        <div class="toggle-theme" id="themeToggle">
+            <i class="fas fa-moon"></i>
+            _TOGGLE THEME
+        </div>
+    </div>
+
+    <div class="main-content" id="mainContent">
+        <h1>Welcome to Workspace</h1>
+        <p>This is your workspace area. More content coming soon...</p>
+    </div>
 
     <script>
-        const logs = document.getElementById('system-logs');
-        const chat = document.getElementById('chat-window');
+        const menuToggle = document.getElementById('menuToggle');
+        const sidebar = document.getElementById('sidebar');
+        const mainContent = document.getElementById('mainContent');
 
-        function addLog(msg, color = 'text-gray-500') {
-            const p = document.createElement('p');
-            p.className = color;
-            p.textContent = `[${new Date().toLocaleTimeString()}] ${msg}`;
-            logs.appendChild(p);
-            logs.scrollTop = logs.scrollHeight;
-        }
+        menuToggle.addEventListener('click', function() {
+            sidebar.classList.toggle('active');
+        });
 
-        function sendMessage() {
-            const input = document.getElementById('user-input');
-            if(!input.value) return;
+        // Close sidebar when clicking on main content (mobile)
+        mainContent.addEventListener('click', function() {
+            if (window.innerWidth <= 768) {
+                sidebar.classList.remove('active');
+            }
+        });
 
-            // User message
-            chat.innerHTML += `<div class="flex gap-3 justify-end"><div class="text-cyan-400 bg-cyan-400/5 p-2 rounded-lg">${input.value}</div></div>`;
-            
-            // Sova "Processing"
-            addLog(`Analyzing Command: ${input.value}`, 'text-yellow-400');
-            
-            setTimeout(() => {
-                addLog(`Executing Web Deployment Sequence...`, 'text-cyan-400');
-                simulateVisualTask();
-            }, 1000);
-
-            input.value = '';
-        }
-
-        function simulateVisualTask() {
-            // Simulate Sova showing a screenshot
-            const placeholder = document.getElementById('screenshot-placeholder');
-            const img = document.getElementById('task-screenshot');
-            
-            addLog(`Capturing Viewport Node_01...`, 'text-gray-400');
-            
-            setTimeout(() => {
-                placeholder.classList.add('hidden');
-                img.classList.remove('hidden');
-                // Using a placeholder image to represent a "web development task"
-                img.src = "https://images.unsplash.com/photo-1547658719-da2b51169166?auto=format&fit=crop&w=800";
-            }, 2000);
-        }
-
-        function spawnBot() {
-            const botList = document.getElementById('bot-list');
-            const botId = Math.floor(Math.random() * 9999);
-            
-            const div = document.createElement('div');
-            div.className = "bg-white/5 border border-white/10 p-3 rounded-lg animate-pulse";
-            div.innerHTML = `
-                <div class="flex justify-between items-center mb-2">
-                    <span class="text-xs font-bold text-gray-400">WORKER_${botId}</span>
-                    <div class="status-dot bg-cyan-400"></div>
-                </div>
-                <p class="text-[9px] text-gray-500">Status: Initializing Assets...</p>
-            `;
-            botList.appendChild(div);
-            addLog(`Sub-Bot ${botId} spawned successfully.`, 'text-green-500');
-        }
-
-        function switchTab(tabId) {
-            // 1. Identify all panes and buttons
-            const panes = {
-                fleet: document.getElementById('pane-fleet'),
-                console: document.getElementById('pane-console'),
-                view: document.getElementById('pane-view')
-            };
-            
-            const buttons = {
-                fleet: document.getElementById('btn-fleet'),
-                console: document.getElementById('btn-console'),
-                view: document.getElementById('btn-view')
-            };
-
-            // 2. Hide all panes and reset button styles
-            Object.keys(panes).forEach(key => {
-                panes[key].classList.remove('mobile-active');
-                buttons[key].classList.remove('tab-active');
-                buttons[key].classList.add('text-gray-500');
-            });
-
-            // 3. Show the selected pane and highlight the button
-            panes[tabId].classList.add('mobile-active');
-            buttons[tabId].classList.add('tab-active');
-            buttons[tabId].classList.remove('text-gray-500');
-        }
+        // Theme toggle
+        const themeToggle = document.getElementById('themeToggle');
+        themeToggle.addEventListener('click', function() {
+            document.body.classList.toggle('dark-mode');
+            localStorage.setItem('theme', document.body.classList.contains('dark-mode') ? 'dark' : 'light');
+        });
     </script>
 </body>
 </html>
