@@ -68,6 +68,33 @@
     </style>
 </head>
 <body class="p-4 md:p-10">
+    <div id="auth-overlay" class="fixed inset-0 z-[100] flex items-center justify-center bg-[#020205] bg-opacity-95 backdrop-blur-xl">
+        <div class="cyber-card p-8 rounded-2xl border-2 border-purple-500/50 max-w-md w-full mx-4">
+            <div class="text-center mb-6">
+                <h2 class="text-2xl font-black tracking-[0.2em] neon-text-blue mb-2">IDENTITY VERIFICATION</h2>
+                <p class="text-[10px] font-mono text-gray-400 uppercase tracking-widest">Restricted Access: SovaCore Internal</p>
+            </div>
+
+            <div class="space-y-4">
+                <div>
+                    <label class="text-[9px] font-mono text-purple-400 uppercase ml-1">Admin Name</label>
+                    <input type="text" id="admin-name" placeholder="Enter Full Name..." 
+                        class="w-full bg-black/60 border border-white/10 rounded-lg px-4 py-3 text-sm focus:outline-none focus:border-cyan-500 text-white font-mono">
+                </div>
+                <div>
+                    <label class="text-[9px] font-mono text-purple-400 uppercase ml-1">Admin Email</label>
+                    <input type="email" id="admin-email" placeholder="admin@sovacore.com" 
+                        class="w-full bg-black/60 border border-white/10 rounded-lg px-4 py-3 text-sm focus:outline-none focus:border-cyan-500 text-white font-mono">
+                </div>
+                
+                <button onclick="verifyIdentity()" id="verify-btn" 
+                    class="w-full py-4 bg-purple-600/20 border border-purple-500/50 rounded-lg text-xs font-bold uppercase hover:bg-purple-600/40 transition-all text-purple-400 mt-4 flex justify-center items-center gap-2">
+                    <i data-lucide="shield-check" class="w-4 h-4"></i> Authenticate
+                </button>
+                <p id="auth-error" class="text-red-500 text-[10px] font-mono uppercase text-center mt-2 hidden">Access Denied: Credentials Invalid</p>
+            </div>
+        </div>
+    </div>
 
     <nav class="flex flex-col md:flex-row justify-between items-center mb-12 border-b border-white/10 pb-6 gap-6">
         <div class="text-center md:text-left">
@@ -149,73 +176,63 @@
         let seenIds = new Set();
         let isFirstLoad = true;
 
-        async function securityCheck() {
-            const { data: { session } } = await sovaClient.auth.getSession();
+        async function verifyIdentity() {
+            const nameInput = document.getElementById('admin-name').value.trim();
+            const emailInput = document.getElementById('admin-email').value.trim();
+            const errorMsg = document.getElementById('auth-error');
+            const btn = document.getElementById('verify-btn');
 
-            // If they aren't even logged in, send them to login
-            if (!session) {
-                window.location.href = 'login.html';
+            if (!nameInput || !emailInput) {
+                errorMsg.innerText = "Please fill all fields";
+                errorMsg.classList.remove('hidden');
                 return;
             }
 
-            // Double-check if the logged-in user is actually in the Admin table
-            const { data: authorized } = await sovaClient
-                .from('authorized_admins')
-                .select('email')
-                .eq('email', session.user.email)
-                .single();
+            // Change button state to show processing
+            btn.innerHTML = `<span class="animate-spin h-4 w-4 border-2 border-purple-400 border-t-transparent rounded-full"></span> VERIFYING...`;
+            btn.disabled = true;
 
-            if (!authorized) {
-                // If they managed to get here but aren't an admin, kick them out
-                alert("CRITICAL: Unauthorized Access. Returning to Home.");
-                await sovaClient.auth.signOut();
-                window.location.href = 'index.html';
+            try {
+                // Query Supabase table 'authorized_admins'
+                const { data, error } = await sovaClient
+                    .from('authorized_admins')
+                    .select('*')
+                    .eq('email', emailInput)
+                    .eq('name', nameInput)
+                    .maybeSingle();
+
+                if (error) throw error;
+
+                if (data) {
+                    // SUCCESS: Identity matched
+                    document.getElementById('auth-overlay').style.display = 'none';
+                    // Optional: Store in session so they don't have to login again during this session
+                    sessionStorage.setItem('sova_admin_authenticated', 'true');
+                    console.log("Access Granted: Welcome back, " + nameInput);
+                } else {
+                    // FAILURE: No match
+                    errorMsg.classList.remove('hidden');
+                    setTimeout(() => {
+                        window.location.href = 'index.html';
+                    }, 1500);
+                }
+            } catch (err) {
+                console.error("Auth Error:", err);
+                errorMsg.innerText = "System Error: Connection Failed";
+                errorMsg.classList.remove('hidden');
+            } finally {
+                btn.innerHTML = `<i data-lucide="shield-check" class="w-4 h-4"></i> Authenticate`;
+                btn.disabled = false;
+                lucide.createIcons();
             }
         }
 
-        // Call this immediately before the dashboard loads any data
-        securityCheck();
-
-        // --- AUTH GATEKEEPER ---
-        async function checkAccess() {
-            const { data: { session }, error } = await sovaClient.auth.getSession();
-            
-            // 1. Check if logged in at all
-            if (!session || error) {
-                window.location.href = 'login.html';
-                return;
+        // Auto-check session on load so they don't re-auth on every refresh
+        window.addEventListener('DOMContentLoaded', () => {
+            if (sessionStorage.getItem('sova_admin_authenticated') === 'true') {
+                document.getElementById('auth-overlay').style.display = 'none';
             }
-
-            // 2. Verify email is an authorized CEO
-            const userEmail = session.user.email;
-            const { data: authorized } = await sovaClient
-                .from('authorized_admins')
-                .select('email')
-                .eq('email', userEmail)
-                .single();
-
-            if (!authorized) {
-                alert("ACCESS DENIED: You are not registered as a CEO.");
-                await sovaClient.auth.signOut();
-                window.location.href = 'login.html';
-            }
-        }
-
-        // Execute check immediately
-        checkAccess();
-
-        async function checkUser() {
-            const { data: { session } } = await sovaClient.auth.getSession();
-            
-            // If no active session, kick them back to the login page
-            if (!session) {
-                window.location.href = 'login.html';
-            } else {
-                console.log("Access Granted:", session.user.email);
-            }
-        }
-        // Run the check immediately when the page loads
-        checkUser();
+        });
 
         async function updateDashboard() {
             const statusChip = document.getElementById('status-chip');
