@@ -222,7 +222,7 @@
             <div class="flex items-center space-x-4">
                 <button id="theme-toggle" class="hover:text-sova-cyan transition flex items-center gap-1 p-2">
                     <svg id="sun-icon" class="h-5 w-5 hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.325 3.325l-.707.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.325 3.325l-.707.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 1 1-8 0a4 4 0 1 1 8 0z" />
                     </svg>
                     <svg id="moon-icon" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
@@ -238,7 +238,7 @@
             </div>
         </div>
         
-        <div id="side-menu" class="fixed inset-y-0 right-0 w-72 bg-sova-dark z-[100] transform translate-x-full transition-transform duration-300 ease-in-out flex flex-col overflow-y-auto">
+        <div id="side-menu" class="fixed inset-y-0 right-0 w-72 bg-sova-dark z-[100] transform translate-x-full transition-transform duration-300 ease-in-out flex flex-col">
 
             <div class="flex justify-between items-center p-6 border-b border-gray-700 shrink-0">
                 <div class="text-xl font-bold font-mono tracking-tighter">SOVA<span class="text-sova-cyan">CORE</span></div>
@@ -249,7 +249,7 @@
                 </button>
             </div>
 
-            <div class="p-6 space-y-1 bg-black font-mono h-auto">
+            <div class="p-6 space-y-1 bg-black font-mono flex-grow overflow-y-auto">
                 <a href="#services" class="flex items-center gap-3 bg-black text-gray-400 hover:text-sova-cyan py-2">
                     <i class="fas fa-home w-5 text-center"></i>
                     <span>_VIEW OUR SERVICES</span>
@@ -295,7 +295,7 @@
                     <span>_ACCESS PORTAL (LOGIN)</span>
                 </a>
 
-                <a href="workspace.html" class="flex items-center gap-3 bg-black text-gray-400 hover:text-sova-cyan py-2">
+                <a href="workspace.html" class="flex items-center gap-3 bg-black text-sova-cyan hover:text-white py-2">
                     <i class="fas fa-briefcase w-5 text-center"></i>
                     <span>_WORKSPACE</span>
                 </a>
@@ -421,7 +421,7 @@
             <div class="grid md:grid-cols-2 gap-16">
                 
                 <div>
-                    <h3 class="text-sova-cyan font-mono text-sm mb-6 tracking-[0.2em]">// TECHNICAL_SPECS_01</h3>
+                    <h3 class="text-sova-cyan font-mono text-sm mb-6 tracking-[0.2em]">_TECHNICAL_SPECS_01</h3>
                     <h2 class="text-3xl font-bold mb-8">Development & Creative</h2>
                     <ul class="space-y-4">
                         <li class="flex items-start">
@@ -444,7 +444,7 @@
                 </div>
 
                 <div>
-                    <h3 class="text-sova-cyan font-mono text-sm mb-6 tracking-[0.2em]">// TECHNICAL_SPECS_02</h3>
+                    <h3 class="text-sova-cyan font-mono text-sm mb-6 tracking-[0.2em]">_TECHNICAL_SPECS_02</h3>
                     <h2 class="text-3xl font-bold mb-8">Security & Intelligence</h2>
                     <ul class="space-y-4">
                         <li class="flex items-start">
@@ -570,21 +570,44 @@
         </div>
     </section>
 
-    <div class="fixed bottom-6 right-6 z-[100] flex flex-col items-end font-sans">
-        <div id="sova-message" class="hidden mb-4 bg-gray-900 border border-sova-cyan p-4 rounded-lg shadow-2xl max-w-[280px] animate-bounce-short">
-            <p class="text-xs font-mono text-sova-cyan mb-1">SOVA_CORE IS SPEAKING...</p>
-            <p class="text-sm text-white">Hello! I am Sova. I’m currently helping businesses replace manual labor with AI agents. Want to see how many hours I can save your team this week?</p>
+    <div id="sova-container" class="fixed bottom-6 right-6 z-[9999] flex flex-col items-end font-sans">
+        <div id="sova-chat-window" class="hidden mb-4 bg-sova-dark border border-sova-cyan rounded-xl shadow-2xl w-[90vw] md:w-96 max-h-[75vh] flex flex-col overflow-hidden animate-fade-in">
+            <div class="bg-sova-cyan p-3 flex justify-between items-center rounded-t-xl">
+                <div class="flex items-center gap-2">
+                    <div class="w-2.5 h-2.5 bg-black rounded-full animate-pulse"></div>
+                    <span class="text-black font-bold font-mono text-xs md:text-sm tracking-tighter">SOVA_CORE_LIVE</span>
+                </div>
+                <button id="close-chat" class="text-black hover:rotate-90 transition-transform duration-200 px-2">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            
+            <div id="chat-messages" class="flex-grow overflow-y-auto p-4 space-y-4 bg-sova-black">
+                <div class="text-sova-cyan font-mono text-[10px] opacity-50 uppercase border-b border-sova-cyan/20 pb-1">
+                    System: Terminal Session Started
+                </div>
+                <div class="bg-gray-800/50 p-3 rounded-xl mr-6">
+                    <p class="text-[10px] text-gray-400 font-mono uppercase mb-1">Sova</p>
+                    <p class="text-gray-200 text-sm">Welcome to SovaCore. How can I assist with your automation needs today?</p>
+                </div>
+            </div>
+
+            <div class="p-3 border-t border-gray-800 bg-sova-dark rounded-b-xl">
+                <div class="flex gap-2">
+                    <input type="text" id="user-chat-input" placeholder="Type message..." 
+                        class="flex-grow bg-sova-black border border-gray-700 p-3 rounded-lg text-white text-sm focus:border-sova-cyan outline-none transition-colors">
+                    <button id="send-chat-btn" class="bg-sova-cyan text-black px-5 py-3 rounded-lg hover:brightness-110 active:scale-95 transition-all shadow-md">
+                        <i class="fas fa-paper-plane"></i>
+                    </button>
+                </div>
+            </div>
         </div>
 
-        <button id="chat-bubble" class="relative bg-sova-cyan p-4 rounded-full shadow-[0_0_20px_rgba(0,240,255,0.4)] hover:scale-110 transition duration-300 group">
-            <span class="absolute top-0 right-0 h-3 w-3 bg-red-500 rounded-full border-2 border-black"></span>
-            
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-black" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
-            </svg>
+        <button id="chat-trigger" class="bg-sova-cyan text-black w-14 h-14 rounded-full shadow-[0_0_20px_rgba(0,255,255,0.4)] flex items-center justify-center hover:scale-110 active:scale-90 transition-all animate-bounce-short">
+            <i class="fas fa-robot text-xl"></i>
         </button>
     </div>
-
+    
     <footer class="py-8 border-t border-gray-800 text-center text-gray-500 text-xs font-mono">
         &copy; 2026 SOVACORE. POWERED BY SOVA A.I.
     </footer>
@@ -658,22 +681,6 @@
         
         setTimeout(typeWriter, 1000);
 
-        // 3. Sova Chat Bubble Logic
-        const bubble = document.getElementById('chat-bubble');
-        const messageBox = document.getElementById('sova-message');
-
-        // Toggle message when clicking the bubble
-        bubble.addEventListener('click', () => {
-            messageBox.classList.toggle('hidden');
-        });
-
-        // Auto-show greeting after 15 seconds
-        setTimeout(() => {
-            if (messageBox.classList.contains('hidden')) {
-                messageBox.classList.remove('hidden');
-            }
-        }, 15000);
-
         // 4. Calculator Logic
         const slider = document.getElementById('profit-slider');
         const valText = document.getElementById('project-val-text');
@@ -692,19 +699,29 @@
 
         const mainSunIcon = document.getElementById('sun-icon');
         const mainMoonIcon = document.getElementById('moon-icon');
-        const sideMenuSunIcon = document.getElementById('side-menu-sun-icon');
-        const sideMenuMoonIcon = document.getElementById('side-menu-moon-icon');
+        const faThemeIcon = document.getElementById('theme-icon-fa'); // Font Awesome icon in side menu
 
         function updateThemeIcons(isLightMode) {
-            const suns = [mainSunIcon, sideMenuSunIcon];
-            const moons = [mainMoonIcon, sideMenuMoonIcon];
+            // Update main nav icons
+            if (mainSunIcon && mainMoonIcon) {
+                if (isLightMode) {
+                    mainSunIcon.classList.remove('hidden'); // Show sun
+                    mainMoonIcon.classList.add('hidden');    // Hide moon
+                } else { // Dark mode
+                    mainSunIcon.classList.add('hidden');     // Hide sun
+                    mainMoonIcon.classList.remove('hidden'); // Show moon
+                }
+            }
 
-            if (isLightMode) {
-                suns.forEach(icon => icon && icon.classList.remove('hidden'));
-                moons.forEach(icon => icon && icon.classList.add('hidden'));
-            } else {
-                suns.forEach(icon => icon && icon.classList.add('hidden'));
-                moons.forEach(icon => icon && icon.classList.remove('hidden'));
+            // Update side menu Font Awesome icon
+            if (faThemeIcon) {
+                if (isLightMode) {
+                    faThemeIcon.classList.remove('fa-moon');
+                    faThemeIcon.classList.add('fa-sun');
+                } else { // Dark mode
+                    faThemeIcon.classList.remove('fa-sun');
+                    faThemeIcon.classList.add('fa-moon');
+                }
             }
         }
 
@@ -713,7 +730,8 @@
             body.classList.add('light-mode');
             updateThemeIcons(true);
         } else {
-            updateThemeIcons(false); // Default to dark mode icons
+            // Default to dark mode. Ensure icons reflect dark mode state.
+            updateThemeIcons(false); 
         }
 
         function toggleTheme() {
@@ -734,8 +752,114 @@
             sideMenuThemeToggle.addEventListener('click', toggleTheme);
         }
 
+        (function() {
+            // 1. Identify Elements
+            const chatWindow = document.getElementById('sova-chat-window');
+            const chatTrigger = document.getElementById('chat-trigger');
+            const closeChat = document.getElementById('close-chat');
+            const sendBtn = document.getElementById('send-chat-btn'); // Corrected ID
+            const userInput = document.getElementById('user-chat-input'); // Corrected ID
+            const messagesContainer = document.getElementById('chat-messages');
+
+            let chatHistory = [];
+
+            // 2. Setup API URL (Detect Local vs Production)
+            const API_URL = window.location.hostname === '127.0.0.1' || window.location.hostname === 'localhost' 
+                ? "http://127.0.0.1:8000/chat" 
+                : "https://sovacore.vercel.app/chat";
+
+            // 3. Toggle Chat Logic
+            if (chatTrigger) { // Ensure chatTrigger exists
+                chatTrigger.addEventListener('click', () => {
+                    chatWindow.classList.toggle('hidden');
+                    if (!chatWindow.classList.contains('hidden')) {
+                        if (userInput) userInput.focus(); // Check userInput before calling focus
+                    }
+                    // Stop animation on click
+                    chatTrigger.classList.remove('animate-bounce-short');
+                });
+            }
+
+            if (closeChat) { // Ensure closeChat exists
+                closeChat.addEventListener('click', () => {
+                    chatWindow.classList.add('hidden');
+                });
+            }
+
+            // 4. Message Handling
+            async function sendMessage() {
+                const text = userInput.value.trim();
+                if (!text) return;
+
+                // UI: Add User Message
+                addMessageUI('user', text);
+                userInput.value = '';
+
+                // Add "Thinking" indicator
+                const loadingDiv = document.createElement('div');
+                loadingDiv.id = 'sova-loading';
+                loadingDiv.className = 'text-sova-cyan font-mono text-[10px] animate-pulse';
+                loadingDiv.innerText = 'SOVA IS THINKING...';
+                messagesContainer.appendChild(loadingDiv);
+                messagesContainer.scrollTop = messagesContainer.scrollHeight;
+
+                try {
+                    const response = await fetch(API_URL, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            message: text,
+                            history: chatHistory
+                        })
+                    });
+
+                    const data = await response.json();
+                    
+                    // Remove loading indicator
+                    document.getElementById('sova-loading')?.remove();
+
+                    if (response.ok) {
+                        addMessageUI('sova', data.response);
+                        chatHistory = data.history; 
+                    } else {
+                        throw new Error("API Error");
+                    }
+                } catch (error) {
+                    document.getElementById('sova-loading')?.remove();
+                    addMessageUI('system', "Transmission failed. Is the API online?");
+                    console.error("Chat Error:", error);
+                }
+            }
+
+            function addMessageUI(role, text) {
+                const isUser = role === 'user';
+                const msgDiv = document.createElement('div');
+                msgDiv.className = `flex flex-col ${isUser ? 'items-end' : 'items-start'} animate-fade-in`;
+                
+                msgDiv.innerHTML = `
+                    <div class="${isUser ? 'bg-sova-cyan/10 border border-sova-cyan/30 ml-6' : 'bg-gray-800/50 mr-6'} p-3 rounded-xl">
+                        <p class="text-[10px] font-mono uppercase ${isUser ? 'text-sova-cyan' : 'text-gray-400'} mb-1">${role}</p>
+                        <p class="${isUser ? 'text-white' : 'text-gray-200'} text-sm leading-relaxed">${text}</p>
+                    </div>
+                `;
+                
+                messagesContainer.appendChild(msgDiv);
+                messagesContainer.scrollTop = messagesContainer.scrollHeight;
+            }
+
+            // 5. Event Listeners (Ensure elements exist before adding listeners)
+            if (sendBtn) {
+                sendBtn.addEventListener('click', sendMessage);
+            }
+            if (userInput) {
+                userInput.addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter') sendMessage();
+                });
+            }
+        })();
     </script>
 
+    
 </body>
 
 </html>
