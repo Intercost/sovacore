@@ -766,7 +766,7 @@
             // 2. Setup API URL (Detect Local vs Production)
             const API_URL = window.location.hostname === '127.0.0.1' || window.location.hostname === 'localhost' 
                 ? "http://127.0.0.1:8000/chat" 
-                : "https://sovacore.vercel.app/chat";
+                : "/chat";
 
             // 3. Toggle Chat Logic
             if (chatTrigger) { // Ensure chatTrigger exists
