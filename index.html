@@ -29,6 +29,7 @@
     <style>      
         html {
             scroll-behavior: smooth;
+            overflow-x: hidden;
         }
 
         /* Default dark mode variables */
@@ -243,11 +244,13 @@
                 </button>
             </div>
         </div>
-        
-        <div id="side-menu" class="fixed inset-y-0 right-0 w-72 bg-sova-dark z-[100] transform translate-x-full transition-transform duration-300 ease-in-out flex flex-col">
 
-            <div class="flex justify-between items-center p-6 border-b border-gray-700 shrink-0">
-                <div class="text-xl font-bold font-mono tracking-tighter">SOVA<span class="text-sova-cyan">CORE</span></div>
+    </nav>
+
+    <div id="side-menu" class="fixed inset-y-0 right-0 w-72 bg-sova-dark z-[100] transform translate-x-full transition-transform duration-300 ease-in-out flex flex-col">
+
+        <div class="flex justify-between items-center p-6 border-b border-gray-700 shrink-0">
+            <div class="text-xl font-bold font-mono tracking-tighter">SOVA<span class="text-sova-cyan">CORE</span></div>
                 <button id="close-side-menu-button" class="text-gray-400 hover:text-white focus:outline-none p-2">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
@@ -323,8 +326,7 @@
         </div>
 
         <div id="menu-overlay" class="fixed inset-0 bg-sova-black/50 z-[90] hidden"></div>
-    </nav>
-
+        
     <section class="flex-grow flex items-center justify-center py-20 px-6 relative overflow-hidden">
         <div class="max-w-4xl w-full text-center relative z-10">
             <div class="mb-12 inline-block text-left bg-gray-900 border border-gray-700 p-4 rounded-lg shadow-2xl w-full max-w-lg mx-auto font-mono text-xs text-green-400 opacity-90">
