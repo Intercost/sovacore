@@ -190,6 +190,11 @@
             box-shadow: 0 0 20px var(--glow-shadow-color) !important;
         }
         body.light-mode .bg-sova-cyan.p-4.rounded-full { background-color: var(--accent-color) !important; }
+        /* For the green dot in light mode */
+        body.light-mode .bg-green-400 {
+            background-color: var(--terminal-text-color) !important;
+        }
+
 
         /* Footer */
         body.light-mode footer.border-t.border-gray-800 { border-color: var(--border-base-color) !important; }
@@ -574,7 +579,7 @@
         <div id="sova-chat-window" class="hidden mb-4 bg-sova-dark border border-sova-cyan rounded-xl shadow-2xl w-[90vw] md:w-96 max-h-[75vh] flex flex-col overflow-hidden animate-fade-in">
             <div class="bg-sova-cyan p-3 flex justify-between items-center rounded-t-xl">
                 <div class="flex items-center gap-2">
-                    <div class="w-2.5 h-2.5 bg-black rounded-full animate-pulse"></div>
+                    <div class="w-2.5 h-2.5 bg-green-400 rounded-full animate-pulse"></div>
                     <span class="text-black font-bold font-mono text-xs md:text-sm tracking-tighter">SOVA_CORE_LIVE</span>
                 </div>
                 <button id="close-chat" class="text-black hover:rotate-90 transition-transform duration-200 px-2">
@@ -583,13 +588,7 @@
             </div>
             
             <div id="chat-messages" class="flex-grow overflow-y-auto p-4 space-y-4 bg-sova-black">
-                <div class="text-sova-cyan font-mono text-[10px] opacity-50 uppercase border-b border-sova-cyan/20 pb-1">
-                    System: Terminal Session Started
-                </div>
-                <div class="bg-gray-800/50 p-3 rounded-xl mr-6">
-                    <p class="text-[10px] text-gray-400 font-mono uppercase mb-1">Sova</p>
-                    <p class="text-gray-200 text-sm">Welcome to SovaCore. How can I assist with your automation needs today?</p>
-                </div>
+                <!-- Initial messages will be added by JavaScript -->
             </div>
 
             <div class="p-3 border-t border-gray-800 bg-sova-dark rounded-b-xl">
@@ -658,7 +657,7 @@
         });
     }
 
-        // 2. Terminal Typewriter Logic
+        // 2. Terminal Typewriter Logic (for the hero section)
         const terminal = document.getElementById('terminal-output');
         const messages = [
             "> ANALYZING SYSTEM ARCHITECTURE...",
@@ -757,30 +756,102 @@
             const chatWindow = document.getElementById('sova-chat-window');
             const chatTrigger = document.getElementById('chat-trigger');
             const closeChat = document.getElementById('close-chat');
-            const sendBtn = document.getElementById('send-chat-btn'); // Corrected ID
-            const userInput = document.getElementById('user-chat-input'); // Corrected ID
+            const sendBtn = document.getElementById('send-chat-btn'); 
+            const userInput = document.getElementById('user-chat-input'); 
             const messagesContainer = document.getElementById('chat-messages');
 
             let chatHistory = [];
+            let initialMessagesLoaded = false; // Flag to ensure initial messages load only once
 
             // 2. Setup API URL (Detect Local vs Production)
             const API_URL = window.location.hostname === '127.0.0.1' || window.location.hostname === 'localhost' 
                 ? "http://127.0.0.1:8000/chat" 
                 : "/chat";
 
+            // NEW: Typewriter effect function for Sova's messages
+            function typeWriterEffect(element, text, speed = 20) {
+                let i = 0;
+                element.textContent = ''; // Clear existing text
+                const interval = setInterval(() => {
+                    if (i < text.length) {
+                        element.textContent += text.charAt(i);
+                        i++;
+                        messagesContainer.scrollTop = messagesContainer.scrollHeight; // Scroll as typing
+                    } else {
+                        clearInterval(interval);
+                        messagesContainer.scrollTop = messagesContainer.scrollHeight; // Final scroll
+                    }
+                }, speed);
+            }
+
+            // MODIFIED: addMessageUI function
+            function addMessageUI(role, text, skipTypewriter = false) {
+                const isUser = role === 'user';
+                const isSystem = role === 'system';
+                
+                const msgWrapper = document.createElement('div');
+                msgWrapper.className = `flex flex-col ${isUser ? 'items-end' : 'items-start'} animate-fade-in`;
+
+                // Handle system messages (not a bubble)
+                if (isSystem) {
+                    msgWrapper.classList.remove('animate-fade-in'); 
+                    msgWrapper.className = 'text-sova-cyan font-mono text-[10px] opacity-50 uppercase border-b border-sova-cyan/20 pb-1';
+                    msgWrapper.textContent = text;
+                    messagesContainer.appendChild(msgWrapper);
+                    messagesContainer.scrollTop = messagesContainer.scrollHeight;
+                    return; 
+                }
+
+                const messageBubble = document.createElement('div');
+                messageBubble.className = `${isUser ? 'bg-sova-cyan/10 border border-sova-cyan/30 ml-6' : 'bg-gray-800/50 mr-6'} p-3 rounded-xl`;
+
+                const roleP = document.createElement('p');
+                roleP.className = `text-[10px] font-mono uppercase ${isUser ? 'text-sova-cyan' : 'text-gray-400'} mb-1`;
+                roleP.textContent = role;
+
+                const textP = document.createElement('p');
+                textP.className = `${isUser ? 'text-white' : 'text-gray-200'} text-sm leading-relaxed`;
+
+                messageBubble.appendChild(roleP);
+                messageBubble.appendChild(textP);
+                msgWrapper.appendChild(messageBubble);
+
+                messagesContainer.appendChild(msgWrapper);
+                messagesContainer.scrollTop = messagesContainer.scrollHeight;
+
+                if (role === 'sova' && !skipTypewriter) { // Apply typewriter for Sova messages unless skipped
+                    typeWriterEffect(textP, text);
+                } else {
+                    textP.textContent = text; // For user messages or skipped Sova messages (e.g., initial load)
+                }
+            }
+
+            // NEW: Function to load initial chat messages
+            function loadInitialChatMessages() {
+                if (initialMessagesLoaded) return; // Prevent loading multiple times
+                
+                addMessageUI('system', 'System: Terminal Session Started');
+                addMessageUI('sova', 'Welcome to SovaCore. How can I assist with your automation needs today?');
+                initialMessagesLoaded = true;
+            }
+
             // 3. Toggle Chat Logic
-            if (chatTrigger) { // Ensure chatTrigger exists
+            if (chatTrigger) { 
                 chatTrigger.addEventListener('click', () => {
+                    const wasHidden = chatWindow.classList.contains('hidden');
                     chatWindow.classList.toggle('hidden');
                     if (!chatWindow.classList.contains('hidden')) {
-                        if (userInput) userInput.focus(); // Check userInput before calling focus
+                        if (userInput) userInput.focus(); 
+                        if (wasHidden) { // Load initial messages only on first open
+                            loadInitialChatMessages();
+                        }
                     }
                     // Stop animation on click
                     chatTrigger.classList.remove('animate-bounce-short');
                 });
             }
 
-            if (closeChat) { // Ensure closeChat exists
+            if (closeChat) { 
                 closeChat.addEventListener('click', () => {
                     chatWindow.classList.add('hidden');
                 });
@@ -819,7 +890,7 @@
                     document.getElementById('sova-loading')?.remove();
 
                     if (response.ok) {
-                        addMessageUI('sova', data.response);
+                        addMessageUI('sova', data.response); // Sova's response with typewriter effect
                         chatHistory = data.history; 
                     } else {
                         throw new Error("API Error");
@@ -829,22 +900,6 @@
                     addMessageUI('system', "Transmission failed. Is the API online?");
                     console.error("Chat Error:", error);
                 }
-            }
-
-            function addMessageUI(role, text) {
-                const isUser = role === 'user';
-                const msgDiv = document.createElement('div');
-                msgDiv.className = `flex flex-col ${isUser ? 'items-end' : 'items-start'} animate-fade-in`;
-                
-                msgDiv.innerHTML = `
-                    <div class="${isUser ? 'bg-sova-cyan/10 border border-sova-cyan/30 ml-6' : 'bg-gray-800/50 mr-6'} p-3 rounded-xl">
-                        <p class="text-[10px] font-mono uppercase ${isUser ? 'text-sova-cyan' : 'text-gray-400'} mb-1">${role}</p>
-                        <p class="${isUser ? 'text-white' : 'text-gray-200'} text-sm leading-relaxed">${text}</p>
-                    </div>
-                `;
-                
-                messagesContainer.appendChild(msgDiv);
-                messagesContainer.scrollTop = messagesContainer.scrollHeight;
             }
 
             // 5. Event Listeners (Ensure elements exist before adding listeners)
